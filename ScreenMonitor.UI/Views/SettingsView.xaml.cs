@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+
 using WpfApp = System.Windows.Application;
 using WpfMsgBox = System.Windows.MessageBox;
 
@@ -20,9 +21,18 @@ public partial class SettingsView : Page
         DataPathText.Text = System.IO.Path.GetFullPath(
             System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data.json"));
 
-        StatusText.Text = app.Monitor.IsRunning
-            ? "运行中 - 正在采集数据"
-            : "已暂停";
+        if (app.Monitor.IsRunning)
+        {
+            StatusText.Text = "运行中 - 正在采集数据";
+            StatusDot.Fill = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x22, 0xC5, 0x5E));
+            StatusText.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x22, 0xC5, 0x5E));
+        }
+        else
+        {
+            StatusText.Text = "已暂停";
+            StatusDot.Fill = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x6B, 0x6B, 0x8D));
+            StatusText.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x6B, 0x6B, 0x8D));
+        }
 
         IgnoreList.ItemsSource = app.Monitor.IgnoredProcesses;
         IgnoreList.Items.Refresh();
@@ -38,7 +48,6 @@ public partial class SettingsView : Page
         {
             app.Monitor.IgnoredProcesses.Add(name);
             IgnoreList.Items.Refresh();
-            // 保存到文件
             if (app.Monitor is ScreenMonitor.Core.Services.WindowMonitorService svc)
                 svc.SaveIgnoreList();
         }
@@ -61,3 +70,4 @@ public partial class SettingsView : Page
         }
     }
 }
+

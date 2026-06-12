@@ -89,9 +89,9 @@ public partial class AppDetailView : Page
         double chartHeight = 260;
         double maxMinutes = 60.0;
         int totalSlots = 24;
-        double colWidth = 600.0 / totalSlots;
+        double colWidth = 560.0 / totalSlots; // ~23px/列
 
-        // 参考线 45分、30分、15分
+        // 参考线
         for (int i = 1; i <= 3; i++)
         {
             var line = new Border
@@ -99,12 +99,16 @@ public partial class AppDetailView : Page
                 Height = 1,
                 VerticalAlignment = VerticalAlignment.Bottom,
                 Margin = new Thickness(0, 0, 0, chartHeight * i / 4),
-                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x2A, 0x2C, 0x4A))
+                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x1E, 0x1E, 0x38))
             };
             ChartGrid.Children.Add(line);
         }
 
-        // 柱子
+        // 渐变画刷
+        var gradLow = (System.Windows.Media.Brush)FindResource("GradBarBlue");
+        var gradMid = (System.Windows.Media.Brush)FindResource("GradBarOrange");
+        var gradHigh = (System.Windows.Media.Brush)FindResource("GradBarRed");
+
         for (int i = 0; i < totalSlots; i++)
         {
             var minUsed = hourlySeconds[i] / 60.0;
@@ -113,29 +117,47 @@ public partial class AppDetailView : Page
             if (barH > chartHeight) barH = chartHeight;
             if (barH < 1 && hourlySeconds[i] > 0) barH = 2;
 
+            // 颜色
             System.Windows.Media.Brush barColor;
             if (hourlySeconds[i] == 0)
-                barColor = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x1C, 0x1E, 0x3A));
+                barColor = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x0E, 0x0E, 0x20));
             else if (minUsed >= 45)
-                barColor = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0x4D, 0x4F));
+                barColor = gradHigh;
             else if (minUsed >= 15)
-                barColor = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFA, 0xAD, 0x14));
+                barColor = gradMid;
             else
-                barColor = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x4A, 0x8E, 0xFF));
+                barColor = gradLow;
 
             var bar = new Border
             {
-                Width = colWidth - 4,
+                Width = colWidth - 3,
                 Height = barH,
                 VerticalAlignment = VerticalAlignment.Bottom,
                 HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
                 CornerRadius = new CornerRadius(3, 3, 0, 0),
-                Margin = new Thickness(i * colWidth + 2, 0, 0, 0),
+                Margin = new Thickness(i * colWidth + 1, 0, 0, 0),
                 Background = barColor,
                 ToolTip = string.Format("{0}:00 - {1}",
                     fromHour.AddHours(i).Hour.ToString("00"),
                     FormatDuration(hourlySeconds[i]))
             };
+
+            // 柱子上方小亮点
+            if (hourlySeconds[i] > 0)
+            {
+                var glow = new Border
+                {
+                    Width = colWidth - 7,
+                    Height = 2,
+                    CornerRadius = new CornerRadius(2, 2, 0, 0),
+                    VerticalAlignment = VerticalAlignment.Bottom,
+                    HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
+                    Margin = new Thickness(i * colWidth + 3, 0, 0, barH - 2),
+                    Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(60, 255, 255, 255))
+                };
+                ChartGrid.Children.Add(glow);
+            }
+
             ChartGrid.Children.Add(bar);
         }
 
@@ -150,7 +172,7 @@ public partial class AppDetailView : Page
                 FontSize = 9,
                 Width = colWidth * 2,
                 TextAlignment = TextAlignment.Center,
-                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x50, 0x52, 0x70))
+                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x3D, 0x3D, 0x5C))
             };
             XAxisPanel.Children.Add(lbl);
         }
@@ -167,4 +189,3 @@ public partial class AppDetailView : Page
         return h + " 时 " + m + " 分";
     }
 }
-
