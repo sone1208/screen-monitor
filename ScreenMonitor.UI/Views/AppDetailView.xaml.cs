@@ -49,7 +49,9 @@ public partial class AppDetailView : Page
             var totalSeconds = appSessions.Sum(s => s.DurationSeconds);
             TotalTimeText.Text = "总使用时间：" + FormatDuration(totalSeconds);
 
-            var fromHour = new DateTime(from.Year, from.Month, from.Day, from.Hour, 0, 0);
+            // 修复：从当前小时往前推 23 小时，确保第 24 个 slot 覆盖当前小时
+            var currentHourStart = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0);
+            var fromHour = currentHourStart.AddHours(-23);
             var hourlySeconds = new long[24];
 
             foreach (var session in appSessions)
@@ -152,7 +154,6 @@ public partial class AppDetailView : Page
 
             var brush = hourlySeconds[i] == 0 ? clrEmpty : clrNormal;
 
-            // 柱子（不含文本标签，避免视觉重叠）
             var bar = new Border
             {
                 Width = Math.Max(colW - 2, 2),
