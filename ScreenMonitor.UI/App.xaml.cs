@@ -64,9 +64,6 @@ public partial class App : System.Windows.Application
             if (_isExiting) return;
             e2.Cancel = true;
             _mainWindow.Hide();
-            _trayIcon.ShowBalloonTip(1000, "屏幕监控",
-                "已最小化到托盘，监控继续中...",
-                ToolTipIcon.Info);
         };
 
         _monitor.Start();
@@ -144,4 +141,5 @@ public partial class App : System.Windows.Application
         return Icon.FromHandle(bmp.GetHicon());
     }
 }
+
 
