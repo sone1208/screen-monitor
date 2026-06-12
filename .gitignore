@@ -1,6 +1,8 @@
 ﻿.dotnet/
 .git-tmp-home/
+.gitconfig
 publish/
+publish-portable/
 *.log
 *.user
 *.suo

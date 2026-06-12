@@ -61,6 +61,20 @@ ScreenMonitor.sln
 
 （待补充）
 
+
+## 便携版（无需安装运行时）
+
+将 publish-portable 文件夹整个复制到任意 Windows 10/11 电脑，运行 ScreenMonitor.cmd 即可。
+
+> 便携版约 160MB，已内置 .NET 8.0 桌面运行时。
+
+### 自行打包便携版
+
+`ash
+.\publish-portable.ps1
+`
+脚本会自动构建项目、打包运行时、生成启动脚本，输出到 publish-portable/ 目录。
 ## 许可
 
 [MIT](LICENSE)
+
