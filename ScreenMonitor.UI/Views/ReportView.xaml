@@ -1,0 +1,50 @@
+﻿<Page x:Class="ScreenMonitor.UI.Views.ReportView"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="Reports" Background="Transparent">
+    <ScrollViewer>
+        <StackPanel Margin="10">
+            <TextBlock Text="Usage Reports" FontSize="24" FontWeight="Bold" Margin="0,0,0,10"/>
+
+            <WrapPanel Margin="0,0,0,15">
+                <TextBlock Text="Date:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <DatePicker x:Name="ReportDatePicker" SelectedDateChanged="OnDateChanged" Margin="0,0,15,0"/>
+                <Button Content="Export CSV" Click="ExportCsv_Click" Padding="10,5" Margin="0,0,8,0"/>
+                <Button Content="Export JSON" Click="ExportJson_Click" Padding="10,5"/>
+            </WrapPanel>
+
+            <!-- Summary cards -->
+            <WrapPanel Margin="0,0,0,15">
+                <Border Background="White" CornerRadius="8" Padding="15" Margin="0,0,10,0" Width="200">
+                    <StackPanel>
+                        <TextBlock Text="Total Active" FontSize="12" Foreground="#888"/>
+                        <TextBlock x:Name="RptActiveText" Text="--" FontSize="22" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+                <Border Background="White" CornerRadius="8" Padding="15" Width="200">
+                    <StackPanel>
+                        <TextBlock Text="Sessions" FontSize="12" Foreground="#888"/>
+                        <TextBlock x:Name="RptSessionsText" Text="--" FontSize="22" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+            </WrapPanel>
+
+            <!-- Session list -->
+            <Border Background="White" CornerRadius="8" Padding="15">
+                <StackPanel>
+                    <TextBlock Text="Session Details" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
+                    <ListView x:Name="SessionList" Height="350">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="App" Width="120" DisplayMemberBinding="{Binding ProcessName}"/>
+                                <GridViewColumn Header="Window" Width="200" DisplayMemberBinding="{Binding WindowTitle}"/>
+                                <GridViewColumn Header="Start" Width="130" DisplayMemberBinding="{Binding StartTime}"/>
+                                <GridViewColumn Header="Duration" Width="80" DisplayMemberBinding="{Binding DurationText}"/>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>
