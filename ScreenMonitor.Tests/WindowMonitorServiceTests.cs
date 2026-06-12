@@ -68,7 +68,7 @@ public class WindowMonitorServiceTests
     }
 
     // ===== WMS-001：正常采集 =====
-    [Fact]
+    [Test]
     public void WMS001_Collect_WhenWindowIsActive_ReturnsSession()
     {
         var service = new FakeWindowMonitorService();
@@ -81,7 +81,7 @@ public class WindowMonitorServiceTests
     }
 
     // ===== WMS-002：无前台窗口时跳过 =====
-    [Fact]
+    [Test]
     public void WMS002_Collect_WhenNoForegroundWindow_SkipsCollection()
     {
         var service = new FakeWindowMonitorService();
@@ -91,7 +91,7 @@ public class WindowMonitorServiceTests
     }
 
     // ===== WMS-003：忽略列表中的进程不被记录 =====
-    [Fact]
+    [Test]
     public void WMS003_Collect_IgnoredProcessIsSkipped()
     {
         var service = new FakeWindowMonitorService();
@@ -104,7 +104,7 @@ public class WindowMonitorServiceTests
     }
 
     // ===== WMS-004：忽略列表精确匹配 =====
-    [Fact]
+    [Test]
     public void WMS004_Collect_IgnoredProcessExactMatch()
     {
         var service = new FakeWindowMonitorService();
@@ -119,7 +119,7 @@ public class WindowMonitorServiceTests
     }
 
     // ===== WMS-005：连续相同窗口合并为一条会话 =====
-    [Fact]
+    [Test]
     public void WMS005_Collect_ConsecutiveSameWindow_MergesIntoOneSession()
     {
         var service = new FakeWindowMonitorService();
@@ -133,7 +133,7 @@ public class WindowMonitorServiceTests
     }
 
     // ===== WMS-006：切换窗口时关闭旧会话创建新会话 =====
-    [Fact]
+    [Test]
     public void WMS006_Collect_SwitchWindow_ClosesOldSessionAndCreatesNew()
     {
         var service = new FakeWindowMonitorService();
@@ -147,7 +147,7 @@ public class WindowMonitorServiceTests
     }
 
     // ===== WMS-007：同名进程不同窗口标题视为不同会话 =====
-    [Fact]
+    [Test]
     public void WMS007_Collect_SameProcessDifferentTitle_AreSeparateSessions()
     {
         var service = new FakeWindowMonitorService();
@@ -160,7 +160,7 @@ public class WindowMonitorServiceTests
     }
 
     // ===== WMS-008：轮询间隔可配置 =====
-    [Fact]
+    [Test]
     public void WMS008_PollInterval_IsConfigurable()
     {
         var service = new FakeWindowMonitorService();
@@ -170,4 +170,5 @@ public class WindowMonitorServiceTests
         Assert.Equal(5, service.PollIntervalSeconds);
     }
 }
+
 

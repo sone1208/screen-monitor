@@ -16,7 +16,7 @@ public class IdleDetectionServiceTests
     }
 
     // ===== IDL-001：超过阈值判定为空闲 =====
-    [Fact]
+    [Test]
     public void IDL001_IsUserIdle_ExceedsThreshold_ReturnsTrue()
     {
         var service = new FakeIdleDetectionService();
@@ -27,7 +27,7 @@ public class IdleDetectionServiceTests
     }
 
     // ===== IDL-002：有操作时判定为非空闲 =====
-    [Fact]
+    [Test]
     public void IDL002_IsUserIdle_WithinThreshold_ReturnsFalse()
     {
         var service = new FakeIdleDetectionService();
@@ -38,7 +38,7 @@ public class IdleDetectionServiceTests
     }
 
     // ===== IDL-003：阈值可配置 =====
-    [Fact]
+    [Test]
     public void IDL003_IdleThreshold_IsConfigurable()
     {
         var service = new FakeIdleDetectionService();
@@ -48,3 +48,4 @@ public class IdleDetectionServiceTests
         Assert.Equal(600, service.IdleThresholdSeconds);
     }
 }
+

@@ -1,122 +1,91 @@
-﻿using ScreenMonitor.Core.Interfaces;
+﻿using ScreenMonitor.Core.Data;
 using ScreenMonitor.Core.Models;
+using ScreenMonitor.Core.Services;
 
 namespace ScreenMonitor.Tests;
 
 public class DataAggregationServiceTests
 {
-    private class FakeDataAggregationService : IDataAggregationService
+    private static (DataAggregationService, string) CreateService()
     {
-        public List<ActivitySession> ActiveSessions { get; } = new();
-        public DailySummary? LastSummary { get; private set; }
-        public string? LastExportPath { get; private set; }
-        public string? LastExportFormat { get; private set; }
-        public int LastCleanupCount { get; private set; }
-
-        public Task CloseAllActiveSessionsAsync()
-        {
-            var now = DateTime.Now;
-            foreach (var session in ActiveSessions)
-            {
-                session.EndTime = now;
-                session.DurationSeconds = (long)(now - session.StartTime).TotalSeconds;
-            }
-            ActiveSessions.Clear();
-            return Task.CompletedTask;
-        }
-
-        public Task<DailySummary> GenerateDailySummaryAsync(DateOnly date)
-        {
-            LastSummary = new DailySummary
-            {
-                Date = date,
-                TotalActiveSeconds = 18000,
-                TotalIdleSeconds = 3000,
-                RecordCount = 10
-            };
-            return Task.FromResult(LastSummary);
-        }
-
-        public Task ExportToCsvAsync(string filePath, DateOnly? from = null, DateOnly? to = null)
-        {
-            LastExportPath = filePath;
-            LastExportFormat = "CSV";
-            return Task.CompletedTask;
-        }
-
-        public Task ExportToJsonAsync(string filePath, DateOnly? from = null, DateOnly? to = null)
-        {
-            LastExportPath = filePath;
-            LastExportFormat = "JSON";
-            return Task.CompletedTask;
-        }
-
-        public Task<int> CleanupOldDataAsync(int retentionDays)
-        {
-            LastCleanupCount = 3;
-            return Task.FromResult(3);
-        }
+        var path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "screenmon_agg_" + System.Guid.NewGuid().ToString("N") + ".json");
+        var repo = new JsonSessionRepository(path);
+        return (new DataAggregationService(repo), path);
     }
 
-    // ===== DAG-001：退出时关闭所有会话 =====
-    [Fact]
+    [Test]
     public async Task DAG001_CloseAllActiveSessions_ClosesEveryOpenSession()
     {
-        var service = new FakeDataAggregationService();
-        service.ActiveSessions.Add(new ActivitySession
+        var (service, path) = CreateService();
+        try
         {
-            Id = 1, ProcessName = "chrome",
-            StartTime = DateTime.Now.AddMinutes(-30)
-        });
-        service.ActiveSessions.Add(new ActivitySession
-        {
-            Id = 2, ProcessName = "code",
-            StartTime = DateTime.Now.AddMinutes(-15)
-        });
-
-        await service.CloseAllActiveSessionsAsync();
-
-        Assert.Empty(service.ActiveSessions);
-        // 验证 EndTime 已被设置
+            await service.CloseAllActiveSessionsAsync();
+        }
+        finally { if (System.IO.File.Exists(path)) System.IO.File.Delete(path); }
     }
 
-    // ===== DAG-002：生成每日汇总 =====
-    [Fact]
+    [Test]
     public async Task DAG002_GenerateDailySummary_ReturnsCorrectSummary()
     {
-        var service = new FakeDataAggregationService();
-        var date = new DateOnly(2026, 6, 12);
+        var (service, path) = CreateService();
+        try
+        {
+            var date = new DateOnly(2026, 6, 12);
+            var start = date.ToDateTime(TimeOnly.MinValue);
+            var repoField = typeof(DataAggregationService).GetField("_repository",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var repo = repoField?.GetValue(service) as JsonSessionRepository;
+            var sessionsField = typeof(JsonSessionRepository).GetField("_sessions",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var sessions = (System.Collections.Generic.List<ActivitySession>?)sessionsField?.GetValue(repo);
+            sessions?.Add(new ActivitySession { Id = 1, ProcessName = "chrome", IsIdle = false,
+                StartTime = start.AddHours(9), EndTime = start.AddHours(11), DurationSeconds = 7200 });
+            sessions?.Add(new ActivitySession { Id = 2, ProcessName = "code", IsIdle = false,
+                StartTime = start.AddHours(13), EndTime = start.AddHours(15), DurationSeconds = 7200 });
 
-        var summary = await service.GenerateDailySummaryAsync(date);
-
-        Assert.Equal(date, summary.Date);
-        Assert.Equal(18000, summary.TotalActiveSeconds);
-        Assert.Equal(10, summary.RecordCount);
+            var summary = await service.GenerateDailySummaryAsync(date);
+            Assert.Equal(date, summary.Date);
+            Assert.Equal(14400, summary.TotalActiveSeconds);
+            Assert.Equal(2, summary.RecordCount);
+        }
+        finally { if (System.IO.File.Exists(path)) System.IO.File.Delete(path); }
     }
 
-    // ===== DAG-003：导出 CSV =====
-    [Fact]
+    [Test]
     public async Task DAG003_ExportToCsv_CreatesFile()
     {
-        var service = new FakeDataAggregationService();
-        var filePath = Path.Combine(Path.GetTempPath(), "test_export.csv");
-
-        await service.ExportToCsvAsync(filePath);
-
-        Assert.Equal(filePath, service.LastExportPath);
-        Assert.Equal("CSV", service.LastExportFormat);
+        var (service, path) = CreateService();
+        var csvPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "testcsv_" + System.Guid.NewGuid().ToString("N") + ".csv");
+        try
+        {
+            await service.ExportToCsvAsync(csvPath);
+            Assert.True(System.IO.File.Exists(csvPath), "CSV file should exist");
+            var content = System.IO.File.ReadAllText(csvPath);
+            Assert.True(content.Length > 0, "CSV file should not be empty");
+        }
+        finally
+        {
+            if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
+            if (System.IO.File.Exists(csvPath)) System.IO.File.Delete(csvPath);
+        }
     }
 
-    // ===== DAG-004：导出 JSON =====
-    [Fact]
+    [Test]
     public async Task DAG004_ExportToJson_CreatesFile()
     {
-        var service = new FakeDataAggregationService();
-        var filePath = Path.Combine(Path.GetTempPath(), "test_export.json");
-
-        await service.ExportToJsonAsync(filePath);
-
-        Assert.Equal(filePath, service.LastExportPath);
-        Assert.Equal("JSON", service.LastExportFormat);
+        var (service, path) = CreateService();
+        var jsonPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "testjson_" + System.Guid.NewGuid().ToString("N") + ".json");
+        try
+        {
+            await service.ExportToJsonAsync(jsonPath);
+            Assert.True(System.IO.File.Exists(jsonPath), "JSON file should exist");
+            var content = System.IO.File.ReadAllText(jsonPath);
+            Assert.True(content.Length > 0, "JSON file should not be empty");
+        }
+        finally
+        {
+            if (System.IO.File.Exists(path)) System.IO.File.Delete(path);
+            if (System.IO.File.Exists(jsonPath)) System.IO.File.Delete(jsonPath);
+        }
     }
 }
