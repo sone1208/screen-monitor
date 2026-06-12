@@ -9,3 +9,5 @@ publish-portable/
 bin/
 obj/
 .vs/
+
+test-portable-run/
