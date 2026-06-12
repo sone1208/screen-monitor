@@ -63,14 +63,17 @@ public partial class DashboardView : Page
             var totalSec = summary.TotalActiveSeconds + summary.TotalIdleSeconds;
             TotalTimeText.Text = FormatDuration(totalSec);
             ActiveTimeText.Text = FormatDuration(summary.TotalActiveSeconds);
+            IdleTimeText.Text = FormatDuration(summary.TotalIdleSeconds);
 
-            if (totalSec > 0 && summary.TotalActiveSeconds > 0)
+            if (totalSec > 0)
             {
                 ActivePctText.Text = (summary.TotalActiveSeconds * 100 / totalSec) + "%";
+                IdlePctText.Text = (summary.TotalIdleSeconds * 100 / totalSec) + "%";
             }
             else
             {
                 ActivePctText.Text = "";
+                IdlePctText.Text = "";
             }
 
             var ignored = app.Monitor.IgnoredProcesses;

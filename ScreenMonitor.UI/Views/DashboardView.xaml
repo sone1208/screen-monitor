@@ -5,7 +5,6 @@
     <ScrollViewer>
         <StackPanel Margin="28,20,28,30">
 
-            <!-- 顶部标题栏 + 设置按钮 -->
             <Grid Margin="0,0,0,20">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -19,14 +18,14 @@
                         Style="{StaticResource TextBtn}" VerticalAlignment="Center"/>
             </Grid>
 
-            <!-- 3 列统计卡片 -->
-            <UniformGrid Columns="3" Margin="0,0,0,24">
+            <!-- 4 列统计卡片 -->
+            <UniformGrid Columns="4" Margin="0,0,0,24">
                 <Border Style="{StaticResource Card}" Padding="18,16" Margin="0,0,12,0">
                     <StackPanel>
                         <TextBlock Text="总监控时长" FontSize="11" Foreground="#A0A0C0"/>
                         <TextBlock x:Name="TotalTimeText" Text="--" FontSize="22" FontWeight="Bold"
                                    Foreground="#F0F0FF" Margin="0,8,0,0"/>
-                        <TextBlock Text="电脑开机以来的总时长" FontSize="10" Foreground="#707090" Margin="0,4,0,0"/>
+                        <TextBlock Text="程序启动至今" FontSize="10" Foreground="#707090" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource Card}" Padding="18,16" Margin="0,0,12,0">
@@ -35,6 +34,14 @@
                         <TextBlock x:Name="ActiveTimeText" Text="--" FontSize="22" FontWeight="Bold"
                                    Foreground="#22C55E" Margin="0,8,0,0"/>
                         <TextBlock x:Name="ActivePctText" Text="" FontSize="10" Foreground="#707090" Margin="0,4,0,0"/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Card}" Padding="18,16" Margin="0,0,12,0">
+                    <StackPanel>
+                        <TextBlock Text="闲置时间" FontSize="11" Foreground="#A0A0C0"/>
+                        <TextBlock x:Name="IdleTimeText" Text="--" FontSize="22" FontWeight="Bold"
+                                   Foreground="#F59E0B" Margin="0,8,0,0"/>
+                        <TextBlock x:Name="IdlePctText" Text="" FontSize="10" Foreground="#707090" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource Card}" Padding="18,16">
@@ -47,7 +54,6 @@
                 </Border>
             </UniformGrid>
 
-            <!-- 应用排行 -->
             <Border Style="{StaticResource Card}" Padding="0">
                 <StackPanel>
                     <Grid Margin="20,20,20,0">
@@ -59,11 +65,13 @@
                                    Foreground="#F0F0FF"/>
                         <WrapPanel Grid.Column="1">
                             <Button x:Name="PrevBtn" Content="◀" Click="PrevPage_Click"
-                                    Style="{StaticResource SmallBtn}" Visibility="Collapsed" Margin="0,0,4,0"/>
+                                    Style="{StaticResource SecondaryBtn}" Padding="8,4" FontSize="11"
+                                    Visibility="Collapsed" Margin="0,0,4,0"/>
                             <TextBlock x:Name="PageInfo" VerticalAlignment="Center" FontSize="12"
                                        Foreground="#707090" Margin="0,0,4,0"/>
                             <Button x:Name="NextBtn" Content="▶" Click="NextPage_Click"
-                                    Style="{StaticResource SmallBtn}" Visibility="Collapsed"/>
+                                    Style="{StaticResource SecondaryBtn}" Padding="8,4" FontSize="11"
+                                    Visibility="Collapsed"/>
                         </WrapPanel>
                     </Grid>
                     <StackPanel x:Name="ChartPanel" Margin="0,10,0,0"/>

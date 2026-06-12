@@ -31,18 +31,12 @@ public class WindowMonitorService : IWindowMonitorService, IDisposable
         _idleDetector = idleDetector;
     }
 
-    /// <summary>
-    /// 设置忽略列表文件路径并在存在时自动加载
-    /// </summary>
     public void SetIgnoreFilePath(string path)
     {
         _ignoreFilePath = path;
         LoadIgnoreList();
     }
 
-    /// <summary>
-    /// 保存忽略列表到文件
-    /// </summary>
     public void SaveIgnoreList()
     {
         if (_ignoreFilePath == null) return;
@@ -57,9 +51,6 @@ public class WindowMonitorService : IWindowMonitorService, IDisposable
         catch { }
     }
 
-    /// <summary>
-    /// 从文件加载忽略列表
-    /// </summary>
     public void LoadIgnoreList()
     {
         if (_ignoreFilePath == null || !System.IO.File.Exists(_ignoreFilePath)) return;
@@ -95,20 +86,49 @@ public class WindowMonitorService : IWindowMonitorService, IDisposable
 
         try
         {
-            // 空闲检测
-            if (_idleDetector.IsUserIdle())
+            bool isIdle = _idleDetector.IsUserIdle();
+            var now = DateTime.Now;
+
+            if (isIdle)
             {
-                if (_currentSession != null)
-                {
+                // 切换到空闲状态：关闭正在追踪的 app session
+                if (_currentSession != null && !_currentSession.IsIdle)
                     CloseCurrentSessionAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+
+                // 创建或更新空闲 session
+                if (_currentSession == null || !_currentSession.IsIdle)
+                {
+                    _currentSession = new ActivitySession
+                    {
+                        ProcessName = "(空闲)",
+                        ExecutablePath = "",
+                        WindowTitle = "用户无操作",
+                        ProcessId = 0,
+                        StartTime = now,
+                        EndTime = now,
+                        DurationSeconds = 0,
+                        IsIdle = true
+                    };
+                    _repository.AddAsync(_currentSession).ConfigureAwait(false).GetAwaiter().GetResult();
+                    OnSessionCreated?.Invoke(_currentSession);
+                }
+                else
+                {
+                    _currentSession.EndTime = now;
+                    _currentSession.DurationSeconds = (long)(now - _currentSession.StartTime).TotalSeconds;
+                    _repository.UpdateAsync(_currentSession).ConfigureAwait(false).GetAwaiter().GetResult();
+                    OnSessionUpdated?.Invoke(_currentSession);
                 }
                 return;
             }
 
+            // 从空闲恢复：关闭空闲 session
+            if (_currentSession != null && _currentSession.IsIdle)
+                CloseCurrentSessionAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+
             var hWnd = NativeMethods.GetForegroundWindow();
             if (hWnd == IntPtr.Zero) return;
 
-            // 忽略不可见或最小化的窗口
             if (!NativeMethods.IsWindowVisible(hWnd) || NativeMethods.IsIconic(hWnd))
             {
                 if (_currentSession != null)
@@ -116,18 +136,14 @@ public class WindowMonitorService : IWindowMonitorService, IDisposable
                 return;
             }
 
-            // 获取进程信息
             NativeMethods.GetWindowThreadProcessId(hWnd, out uint processId);
             if (processId == 0) return;
 
             var process = Process.GetProcessById((int)processId);
             var processName = process.ProcessName;
             var exePath = GetExecutablePath(process.Handle);
-
-            // 获取窗口标题
             var title = GetWindowText(hWnd);
 
-            // 忽略列表检查
             if (IgnoredProcesses.Contains(processName, StringComparer.OrdinalIgnoreCase))
             {
                 if (_currentSession != null)
@@ -135,9 +151,7 @@ public class WindowMonitorService : IWindowMonitorService, IDisposable
                 return;
             }
 
-            var now = DateTime.Now;
-
-            // 判断是否需要合并到当前会话
+            // 合并同一进程的连续 session
             if (_currentSession != null &&
                 _currentSession.ProcessName == processName &&
                 _currentSession.WindowTitle == title)
@@ -149,9 +163,7 @@ public class WindowMonitorService : IWindowMonitorService, IDisposable
             else
             {
                 if (_currentSession != null)
-                {
                     CloseCurrentSessionAsync().ConfigureAwait(false).GetAwaiter().GetResult();
-                }
 
                 _currentSession = new ActivitySession
                 {

@@ -111,8 +111,7 @@ public partial class App : System.Windows.Application
         try
         {
             if (_aggregation != null)
-                _aggregation.CloseAllActiveSessionsAsync()
-                    .GetAwaiter().GetResult();
+                System.Threading.Tasks.Task.Run(() => _aggregation.CloseAllActiveSessionsAsync()).GetAwaiter().GetResult();
         }
         catch { }
 
@@ -145,3 +144,4 @@ public partial class App : System.Windows.Application
         return Icon.FromHandle(bmp.GetHicon());
     }
 }
+
