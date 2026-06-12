@@ -19,14 +19,14 @@
                         Style="{StaticResource TextBtn}" VerticalAlignment="Center"/>
             </Grid>
 
-            <!-- 统计卡片：4 列等宽，不用省略号 -->
-            <UniformGrid Columns="4" Margin="0,0,0,24">
+            <!-- 3 列统计卡片 -->
+            <UniformGrid Columns="3" Margin="0,0,0,24">
                 <Border Style="{StaticResource Card}" Padding="18,16" Margin="0,0,12,0">
                     <StackPanel>
-                        <TextBlock Text="总时间" FontSize="11" Foreground="#A0A0C0"/>
+                        <TextBlock Text="总监控时长" FontSize="11" Foreground="#A0A0C0"/>
                         <TextBlock x:Name="TotalTimeText" Text="--" FontSize="22" FontWeight="Bold"
                                    Foreground="#F0F0FF" Margin="0,8,0,0"/>
-                        <TextBlock Text="含活跃与闲置" FontSize="10" Foreground="#707090" Margin="0,4,0,0"/>
+                        <TextBlock Text="电脑开机以来的总时长" FontSize="10" Foreground="#707090" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource Card}" Padding="18,16" Margin="0,0,12,0">
@@ -35,14 +35,6 @@
                         <TextBlock x:Name="ActiveTimeText" Text="--" FontSize="22" FontWeight="Bold"
                                    Foreground="#22C55E" Margin="0,8,0,0"/>
                         <TextBlock x:Name="ActivePctText" Text="" FontSize="10" Foreground="#707090" Margin="0,4,0,0"/>
-                    </StackPanel>
-                </Border>
-                <Border Style="{StaticResource Card}" Padding="18,16" Margin="0,0,12,0">
-                    <StackPanel>
-                        <TextBlock Text="闲置时间" FontSize="11" Foreground="#A0A0C0"/>
-                        <TextBlock x:Name="IdleTimeText" Text="--" FontSize="22" FontWeight="Bold"
-                                   Foreground="#F59E0B" Margin="0,8,0,0"/>
-                        <TextBlock x:Name="IdlePctText" Text="" FontSize="10" Foreground="#707090" Margin="0,4,0,0"/>
                     </StackPanel>
                 </Border>
                 <Border Style="{StaticResource Card}" Padding="18,16">
@@ -58,37 +50,30 @@
             <!-- 应用排行 -->
             <Border Style="{StaticResource Card}" Padding="0">
                 <StackPanel>
-                    <!-- 标题 + 分页 -->
-                    <Grid Margin="20,16,20,12">
+                    <Grid Margin="20,20,20,0">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="应用排行" FontSize="15" FontWeight="Bold"
+                        <TextBlock Grid.Column="0" Text="应用使用排行" FontSize="17" FontWeight="Bold"
                                    Foreground="#F0F0FF"/>
-                        <StackPanel Grid.Column="1" Orientation="Horizontal" 
-                                    x:Name="PaginationPanel" Visibility="Collapsed">
-                            <Button x:Name="PrevBtn" Content="←" Click="PrevPage_Click"
-                                    Style="{StaticResource SecondaryBtn}" Padding="6,2" FontSize="11"
-                                    Margin="0,0,8,0" Visibility="Collapsed"/>
-                            <TextBlock x:Name="PageInfo" Text="" VerticalAlignment="Center"
-                                       FontSize="12" Foreground="#A0A0C0" Margin="0,0,8,0"/>
-                            <Button x:Name="NextBtn" Content="→" Click="NextPage_Click"
-                                    Style="{StaticResource SecondaryBtn}" Padding="6,2" FontSize="11"
-                                    Visibility="Collapsed"/>
-                        </StackPanel>
+                        <WrapPanel Grid.Column="1">
+                            <Button x:Name="PrevBtn" Content="◀" Click="PrevPage_Click"
+                                    Style="{StaticResource SmallBtn}" Visibility="Collapsed" Margin="0,0,4,0"/>
+                            <TextBlock x:Name="PageInfo" VerticalAlignment="Center" FontSize="12"
+                                       Foreground="#707090" Margin="0,0,4,0"/>
+                            <Button x:Name="NextBtn" Content="▶" Click="NextPage_Click"
+                                    Style="{StaticResource SmallBtn}" Visibility="Collapsed"/>
+                        </WrapPanel>
                     </Grid>
-
-                    <Border Height="1" Background="#2F2F50" Margin="0"/>
-
-                    <StackPanel x:Name="ChartPanel" Margin="0,4,0,4"/>
-
-                    <TextBlock x:Name="NoDataText" Text="暂无数据，开始使用电脑后将自动记录"
+                    <StackPanel x:Name="ChartPanel" Margin="0,10,0,0"/>
+                    <StackPanel x:Name="PaginationPanel" Visibility="Collapsed"
+                                HorizontalAlignment="Center" Margin="0,12,0,16"/>
+                    <TextBlock x:Name="NoDataText" Text="暂无数据，程序正在采集使用记录..."
                                Foreground="#707090" FontSize="13" Visibility="Collapsed"
-                               Margin="0,24,0,24" HorizontalAlignment="Center"/>
+                               Margin="0,30,0,40" HorizontalAlignment="Center"/>
                 </StackPanel>
             </Border>
-
         </StackPanel>
     </ScrollViewer>
 </Page>
