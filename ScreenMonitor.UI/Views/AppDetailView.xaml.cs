@@ -49,7 +49,7 @@ public partial class AppDetailView : Page
             var totalSeconds = appSessions.Sum(s => s.DurationSeconds);
             TotalTimeText.Text = "总使用时间：" + FormatDuration(totalSeconds);
 
-            // 修复：从当前小时往前推 23 小时，确保第 24 个 slot 覆盖当前小时
+            // 从当前小时往前推 23 小时，确保第 24 个 slot 覆盖当前小时
             var currentHourStart = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0);
             var fromHour = currentHourStart.AddHours(-23);
             var hourlySeconds = new long[24];
@@ -117,7 +117,7 @@ public partial class AppDetailView : Page
             ChartGrid.Children.Add(line);
         }
 
-        // Y 轴刻度（0, 15, 30, 45, 60）
+        // Y 轴刻度
         var yLabels = new[] {
             new { Text = "60", Top = 0.0 },
             new { Text = "45", Top = chartHeight * 0.25 },
@@ -139,29 +139,27 @@ public partial class AppDetailView : Page
             ChartGrid.Children.Add(lbl);
         }
 
-        // 柱子颜色
         var clrNormal = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x3B, 0x82, 0xF6));
         var clrEmpty = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x1A, 0x1A, 0x30));
-
-        double maxBarH = chartHeight;
 
         for (int i = 0; i < totalSlots; i++)
         {
             var usedMin = hourlySeconds[i] / 60.0;
-            var barH = Math.Min((usedMin / maxMinutes) * maxBarH, maxBarH);
+            var barH = Math.Min((usedMin / maxMinutes) * chartHeight, chartHeight);
             if (barH < 0) barH = 0;
             if (barH < 1.5 && hourlySeconds[i] > 0) barH = 2;
 
             var brush = hourlySeconds[i] == 0 ? clrEmpty : clrNormal;
 
+            // 柱子居中在其 slot 内
             var bar = new Border
             {
-                Width = Math.Max(colW - 2, 2),
+                Width = Math.Max(colW - 4, 2),
                 Height = barH,
                 VerticalAlignment = VerticalAlignment.Bottom,
                 HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
                 CornerRadius = new CornerRadius(2, 2, 0, 0),
-                Margin = new Thickness(i * colW + 1, 0, 0, 0),
+                Margin = new Thickness(i * colW + 2, 0, 0, 0),
                 Background = brush,
                 ToolTip = string.Format("{0}:00 - {1}",
                     fromHour.AddHours(i).Hour.ToString("00"),
@@ -170,17 +168,17 @@ public partial class AppDetailView : Page
             ChartGrid.Children.Add(bar);
         }
 
-        // X 轴标签（每 2 小时标一个）
+        // X 轴标签：每整点一个，居中在每个 slot 下方
         XAxisPanel.Children.Clear();
         XAxisPanel.Width = availWidth;
-        for (int i = 0; i < totalSlots; i += 2)
+        for (int i = 0; i < totalSlots; i++)
         {
             var hour = fromHour.AddHours(i).Hour;
             var lbl = new TextBlock
             {
                 Text = hour.ToString("00") + ":00",
-                FontSize = 9,
-                Width = colW * 2,
+                FontSize = 8,
+                Width = colW,
                 TextAlignment = TextAlignment.Center,
                 Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x70, 0x70, 0x90))
             };
