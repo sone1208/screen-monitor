@@ -31,7 +31,6 @@ public partial class App : System.Windows.Application
         _aggregation = new DataAggregationService(_repository);
         _monitor = new WindowMonitorService(_repository, _idleDetector);
 
-        // 设置忽略列表持久化文件
         var ignorePath = System.IO.Path.Combine(
             AppDomain.CurrentDomain.BaseDirectory, "ignorelist.json");
         ((WindowMonitorService)_monitor).SetIgnoreFilePath(ignorePath);
@@ -95,12 +94,25 @@ public partial class App : System.Windows.Application
 
     private async void ExitApp()
     {
-        if (_aggregation != null)
-            await _aggregation.CloseAllActiveSessionsAsync();
-        (_monitor as IDisposable)?.Dispose();
-        _trayIcon?.Dispose();
-        _mainWindow?.Close();
-        Shutdown();
+        try
+        {
+            // 先停止监控
+            _monitor?.Stop();
+
+            // 关闭活跃会话
+            if (_aggregation != null)
+                await _aggregation.CloseAllActiveSessionsAsync();
+        }
+        catch { }
+        finally
+        {
+            // 清理资源并退出
+            (_monitor as IDisposable)?.Dispose();
+            _trayIcon?.Dispose();
+            _mainWindow?.Close();
+            // 直接退出进程，绕过 Closing 事件
+            System.Windows.Application.Current.Shutdown();
+        }
     }
 
     private static Icon CreateAppIcon()

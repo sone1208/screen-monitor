@@ -46,10 +46,13 @@ public partial class AppDetailView : Page
                 return;
             }
 
+            NoDataText.Visibility = Visibility.Collapsed;
+            ChartGrid.Visibility = Visibility.Visible;
+            XAxisPanel.Visibility = Visibility.Visible;
+
             var totalSeconds = appSessions.Sum(s => s.DurationSeconds);
             TotalTimeText.Text = "总使用时间：" + FormatDuration(totalSeconds);
 
-            // 按小时统计
             var fromHour = new DateTime(from.Year, from.Month, from.Day, from.Hour, 0, 0);
             var hourlySeconds = new long[24];
 
@@ -89,7 +92,7 @@ public partial class AppDetailView : Page
         double chartHeight = 260;
         double maxMinutes = 60.0;
         int totalSlots = 24;
-        double colWidth = 560.0 / totalSlots; // ~23px/列
+        double colWidth = 560.0 / totalSlots;
 
         // 参考线
         for (int i = 1; i <= 3; i++)
@@ -99,15 +102,24 @@ public partial class AppDetailView : Page
                 Height = 1,
                 VerticalAlignment = VerticalAlignment.Bottom,
                 Margin = new Thickness(0, 0, 0, chartHeight * i / 4),
-                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x1E, 0x1E, 0x38))
+                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x2F, 0x2F, 0x50))
             };
             ChartGrid.Children.Add(line);
         }
 
-        // 渐变画刷
-        var gradLow = (System.Windows.Media.Brush)FindResource("GradBarBlue");
-        var gradMid = (System.Windows.Media.Brush)FindResource("GradBarOrange");
-        var gradHigh = (System.Windows.Media.Brush)FindResource("GradBarRed");
+        // 使用正确的资源名
+        System.Windows.Media.Brush gradLow = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x3B, 0x82, 0xF6));
+        System.Windows.Media.Brush gradMid = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xF5, 0x9E, 0x0B));
+        System.Windows.Media.Brush gradHigh = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xEF, 0x44, 0x44));
+
+        // 尝试从资源获取渐变刷
+        try
+        {
+            gradLow = (System.Windows.Media.Brush)FindResource("GradBlue");
+            gradMid = (System.Windows.Media.Brush)FindResource("GradOrange");
+            gradHigh = (System.Windows.Media.Brush)FindResource("GradRed");
+        }
+        catch { }
 
         for (int i = 0; i < totalSlots; i++)
         {
@@ -117,10 +129,9 @@ public partial class AppDetailView : Page
             if (barH > chartHeight) barH = chartHeight;
             if (barH < 1 && hourlySeconds[i] > 0) barH = 2;
 
-            // 颜色
             System.Windows.Media.Brush barColor;
             if (hourlySeconds[i] == 0)
-                barColor = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x0E, 0x0E, 0x20));
+                barColor = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x1A, 0x1A, 0x30));
             else if (minUsed >= 45)
                 barColor = gradHigh;
             else if (minUsed >= 15)
@@ -142,7 +153,6 @@ public partial class AppDetailView : Page
                     FormatDuration(hourlySeconds[i]))
             };
 
-            // 柱子上方小亮点
             if (hourlySeconds[i] > 0)
             {
                 var glow = new Border
@@ -161,7 +171,7 @@ public partial class AppDetailView : Page
             ChartGrid.Children.Add(bar);
         }
 
-        // X轴标签
+        // X轴
         XAxisPanel.Children.Clear();
         for (int i = 0; i < totalSlots; i += 2)
         {
@@ -172,7 +182,7 @@ public partial class AppDetailView : Page
                 FontSize = 9,
                 Width = colWidth * 2,
                 TextAlignment = TextAlignment.Center,
-                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x3D, 0x3D, 0x5C))
+                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x70, 0x70, 0x90))
             };
             XAxisPanel.Children.Add(lbl);
         }
@@ -189,3 +199,7 @@ public partial class AppDetailView : Page
         return h + " 时 " + m + " 分";
     }
 }
+
+
+
+
