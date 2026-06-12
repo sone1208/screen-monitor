@@ -14,15 +14,35 @@
                 <StackPanel>
                     <TextBlock Text="忽略列表" FontSize="15" FontWeight="Bold"
                                Foreground="#F0F0FF" Margin="0,0,0,6"/>
-                    <TextBlock Text="添加到此列表的进程将不会被记录和显示。"
+                    <TextBlock Text="添加到此列表的进程将不会被记录和显示。点击右侧 ✕ 移出。"
                                Foreground="#A0A0C0" FontSize="12" Margin="0,0,0,14"/>
                     <WrapPanel Margin="0,0,0,12">
                         <TextBox x:Name="IgnoreInput" Width="220" Style="{StaticResource ModernInput}"
                                  Margin="0,0,10,0"/>
                         <Button Content="添加" Click="AddIgnore_Click" Style="{StaticResource PrimaryBtn}"/>
                     </WrapPanel>
-                    <ListBox x:Name="IgnoreList" Height="120"
-                             Background="#1A1A30" Foreground="#F0F0FF" BorderBrush="#3A3A5C" BorderThickness="1"/>
+                    <ListBox x:Name="IgnoreList" Height="150"
+                             Background="#1A1A30" Foreground="#F0F0FF" BorderBrush="#3A3A5C" BorderThickness="1">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Margin="4,2">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding}" VerticalAlignment="Center"
+                                               FontSize="13" Foreground="#F0F0FF"
+                                               TextTrimming="CharacterEllipsis"/>
+                                    <Button Grid.Column="1" Content="✕" FontSize="11"
+                                            Width="24" Height="24" Padding="0"
+                                            Foreground="#EF4444" Background="Transparent"
+                                            BorderThickness="0" Cursor="Hand"
+                                            Click="RemoveIgnore_Click"
+                                            ToolTip="移出忽略列表"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                 </StackPanel>
             </Border>
 

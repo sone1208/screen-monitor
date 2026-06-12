@@ -34,7 +34,6 @@ public partial class SettingsView : Page
         }
 
         IgnoreList.ItemsSource = app.Monitor.IgnoredProcesses;
-        IgnoreList.Items.Refresh();
     }
 
     private void Back_Click(object sender, RoutedEventArgs e)
@@ -54,6 +53,19 @@ public partial class SettingsView : Page
                 svc.SaveIgnoreList();
         }
         IgnoreInput.Clear();
+    }
+
+    private void RemoveIgnore_Click(object sender, RoutedEventArgs e)
+    {
+        var btn = (System.Windows.Controls.Button)sender;
+        var processName = btn.DataContext as string;
+        if (string.IsNullOrEmpty(processName)) return;
+
+        var app = (App)WpfApp.Current;
+        app.Monitor.IgnoredProcesses.Remove(processName);
+        IgnoreList.Items.Refresh();
+        if (app.Monitor is ScreenMonitor.Core.Services.WindowMonitorService svc)
+            svc.SaveIgnoreList();
     }
 
     private async void ApplyRetention_Click(object sender, RoutedEventArgs e)
