@@ -5,69 +5,62 @@
     <Application.Resources>
         <ResourceDictionary>
 
-            <!-- ==================== 颜色 ==================== -->
-            <SolidColorBrush x:Key="BgPage" Color="#0B0B1A"/>
-            <SolidColorBrush x:Key="BgSidebar" Color="#080812"/>
-            <SolidColorBrush x:Key="BgCard" Color="#141428"/>
-            <SolidColorBrush x:Key="BgCardHover" Color="#1A1A30"/>
-            <SolidColorBrush x:Key="BgInput" Color="#0E0E20"/>
-            <SolidColorBrush x:Key="BorderColor" Color="#1E1E38"/>
-            <SolidColorBrush x:Key="BorderLight" Color="#2A2A4A"/>
-            <SolidColorBrush x:Key="TextPrimary" Color="#E8E8F8"/>
-            <SolidColorBrush x:Key="TextSecondary" Color="#6B6B8D"/>
-            <SolidColorBrush x:Key="TextMuted" Color="#3D3D5C"/>
+            <!-- ==================== 颜色（优化对比度） ==================== -->
+            <!-- 页面背景：深灰蓝，不过暗 -->
+            <SolidColorBrush x:Key="BgPage" Color="#1B1B2F"/>
+            <!-- 卡片背景：比页面亮一级 -->
+            <SolidColorBrush x:Key="BgCard" Color="#252540"/>
+            <!-- 输入框背景 -->
+            <SolidColorBrush x:Key="BgInput" Color="#1A1A30"/>
+            <!-- 边框 -->
+            <SolidColorBrush x:Key="BorderColor" Color="#2F2F50"/>
+            <SolidColorBrush x:Key="BorderLight" Color="#3A3A5C"/>
+
+            <!-- 文字（提高亮度确保清晰） -->
+            <SolidColorBrush x:Key="TextPrimary" Color="#F0F0FF"/>
+            <SolidColorBrush x:Key="TextSecondary" Color="#A0A0C0"/>
+            <SolidColorBrush x:Key="TextMuted" Color="#707090"/>
+
+            <!-- 强调色 -->
             <SolidColorBrush x:Key="AccentPrimary" Color="#6366F1"/>
-            <SolidColorBrush x:Key="AccentHover" Color="#818CF8"/>
             <SolidColorBrush x:Key="AccentGreen" Color="#22C55E"/>
             <SolidColorBrush x:Key="AccentRed" Color="#EF4444"/>
             <SolidColorBrush x:Key="AccentOrange" Color="#F59E0B"/>
             <SolidColorBrush x:Key="AccentBlue" Color="#3B82F6"/>
-            <SolidColorBrush x:Key="AccentPurple" Color="#A855F7"/>
 
-            <!-- 渐变画刷 -->
-            <LinearGradientBrush x:Key="GradTitle" StartPoint="0,0" EndPoint="1,0">
-                <GradientStop Color="#6366F1" Offset="0.0"/>
-                <GradientStop Color="#A855F7" Offset="1.0"/>
+            <!-- 渐变 -->
+            <LinearGradientBrush x:Key="GradPrimary" StartPoint="0,0" EndPoint="1,1">
+                <GradientStop Color="#6366F1" Offset="0"/>
+                <GradientStop Color="#818CF8" Offset="1"/>
             </LinearGradientBrush>
-            <LinearGradientBrush x:Key="GradBarBlue" StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Color="#3B82F6" Offset="0.0"/>
-                <GradientStop Color="#6366F1" Offset="1.0"/>
+            <LinearGradientBrush x:Key="GradGreen" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#22C55E" Offset="0"/>
+                <GradientStop Color="#16A34A" Offset="1"/>
             </LinearGradientBrush>
-            <LinearGradientBrush x:Key="GradBarGreen" StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Color="#22C55E" Offset="0.0"/>
-                <GradientStop Color="#16A34A" Offset="1.0"/>
+            <LinearGradientBrush x:Key="GradOrange" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#F59E0B" Offset="0"/>
+                <GradientStop Color="#D97706" Offset="1"/>
             </LinearGradientBrush>
-            <LinearGradientBrush x:Key="GradBarOrange" StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Color="#F59E0B" Offset="0.0"/>
-                <GradientStop Color="#D97706" Offset="1.0"/>
+            <LinearGradientBrush x:Key="GradRed" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#EF4444" Offset="0"/>
+                <GradientStop Color="#DC2626" Offset="1"/>
             </LinearGradientBrush>
-            <LinearGradientBrush x:Key="GradBarRed" StartPoint="0,0" EndPoint="0,1">
-                <GradientStop Color="#EF4444" Offset="0.0"/>
-                <GradientStop Color="#DC2626" Offset="1.0"/>
-            </LinearGradientBrush>
-
-            <!-- 标题渐变 -->
-            <LinearGradientBrush x:Key="GradPageTitle" StartPoint="0,0" EndPoint="1,0">
-                <GradientStop Color="#818CF8" Offset="0.0"/>
-                <GradientStop Color="#C084FC" Offset="1.0"/>
+            <LinearGradientBrush x:Key="GradBlue" StartPoint="0,0" EndPoint="0,1">
+                <GradientStop Color="#3B82F6" Offset="0"/>
+                <GradientStop Color="#6366F1" Offset="1"/>
             </LinearGradientBrush>
 
-            <!-- ==================== 侧边栏导航按钮 ==================== -->
-            <Style x:Key="SidebarBtn" TargetType="Button">
+            <!-- ==================== 文字按钮（设置/返回用） ==================== -->
+            <Style x:Key="TextBtn" TargetType="Button">
                 <Setter Property="Background" Value="Transparent"/>
                 <Setter Property="BorderThickness" Value="0"/>
-                <Setter Property="Padding" Value="16,10"/>
-                <Setter Property="Margin" Value="0,2"/>
+                <Setter Property="Padding" Value="10,5"/>
                 <Setter Property="Cursor" Value="Hand"/>
-                <Setter Property="Foreground" Value="#6B6B8D"/>
                 <Setter Property="FontSize" Value="13"/>
-                <Setter Property="HorizontalAlignment" Value="Stretch"/>
-                <Setter Property="HorizontalContentAlignment" Value="Left"/>
-                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Foreground" Value="#818CF8"/>
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="Background" Value="#141428"/>
-                        <Setter Property="Foreground" Value="#E8E8F8"/>
+                        <Setter Property="Foreground" Value="#A5B4FC"/>
                     </Trigger>
                 </Style.Triggers>
             </Style>
@@ -85,9 +78,7 @@
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
                             <Border Background="{TemplateBinding Background}" 
-                                    CornerRadius="6"
-                                    BorderThickness="0"
-                                    SnapsToDevicePixels="True">
+                                    CornerRadius="6" BorderThickness="0" SnapsToDevicePixels="True">
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
                                                   Margin="{TemplateBinding Padding}"/>
                             </Border>
@@ -98,16 +89,13 @@
                     <Trigger Property="IsMouseOver" Value="True">
                         <Setter Property="Background" Value="#818CF8"/>
                     </Trigger>
-                    <Trigger Property="IsPressed" Value="True">
-                        <Setter Property="Background" Value="#4F46E5"/>
-                    </Trigger>
                 </Style.Triggers>
             </Style>
 
             <!-- ==================== 次要按钮 ==================== -->
             <Style x:Key="SecondaryBtn" TargetType="Button">
-                <Setter Property="Background" Value="#1E1E38"/>
-                <Setter Property="Foreground" Value="#B8B8D0"/>
+                <Setter Property="Background" Value="#252540"/>
+                <Setter Property="Foreground" Value="#C0C0D8"/>
                 <Setter Property="BorderThickness" Value="1"/>
                 <Setter Property="Padding" Value="14,7"/>
                 <Setter Property="FontSize" Value="12"/>
@@ -115,10 +103,8 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="Button">
-                            <Border Background="{TemplateBinding Background}" 
-                                    CornerRadius="6"
-                                    BorderBrush="#2A2A4A"
-                                    BorderThickness="{TemplateBinding BorderThickness}"
+                            <Border Background="{TemplateBinding Background}" CornerRadius="6"
+                                    BorderBrush="#3A3A5C" BorderThickness="{TemplateBinding BorderThickness}"
                                     SnapsToDevicePixels="True">
                                 <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"
                                                   Margin="{TemplateBinding Padding}"/>
@@ -128,17 +114,17 @@
                 </Setter>
                 <Style.Triggers>
                     <Trigger Property="IsMouseOver" Value="True">
-                        <Setter Property="Background" Value="#2A2A4A"/>
-                        <Setter Property="Foreground" Value="#E8E8F8"/>
+                        <Setter Property="Background" Value="#2F2F50"/>
+                        <Setter Property="Foreground" Value="#F0F0FF"/>
                     </Trigger>
                 </Style.Triggers>
             </Style>
 
             <!-- ==================== 输入框 ==================== -->
             <Style x:Key="ModernInput" TargetType="TextBox">
-                <Setter Property="Background" Value="#0E0E20"/>
-                <Setter Property="Foreground" Value="#E8E8F8"/>
-                <Setter Property="BorderBrush" Value="#2A2A4A"/>
+                <Setter Property="Background" Value="#1A1A30"/>
+                <Setter Property="Foreground" Value="#F0F0FF"/>
+                <Setter Property="BorderBrush" Value="#3A3A5C"/>
                 <Setter Property="BorderThickness" Value="1"/>
                 <Setter Property="Height" Value="32"/>
                 <Setter Property="VerticalContentAlignment" Value="Center"/>
@@ -148,11 +134,10 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="TextBox">
-                            <Border Background="{TemplateBinding Background}" 
-                                    CornerRadius="6"
+                            <Border Background="{TemplateBinding Background}" CornerRadius="6"
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}">
-                                <ScrollViewer x:Name="PART_ContentHost" 
+                                <ScrollViewer x:Name="PART_ContentHost"
                                               Margin="{TemplateBinding Padding}"
                                               VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
                             </Border>
@@ -163,17 +148,13 @@
 
             <!-- ==================== 卡片 ==================== -->
             <Style x:Key="Card" TargetType="Border">
-                <Setter Property="Background" Value="#141428"/>
+                <Setter Property="Background" Value="#252540"/>
                 <Setter Property="CornerRadius" Value="10"/>
-                <Setter Property="BorderBrush" Value="#1E1E38"/>
+                <Setter Property="BorderBrush" Value="#2F2F50"/>
                 <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="Effect">
-                    <Setter.Value>
-                        <DropShadowEffect ShadowDepth="4" BlurRadius="16" Color="#000" Opacity="0.3"/>
-                    </Setter.Value>
-                </Setter>
             </Style>
 
         </ResourceDictionary>
     </Application.Resources>
 </Application>
+

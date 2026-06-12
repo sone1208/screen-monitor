@@ -1,6 +1,5 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using ScreenMonitor.Core.Models;
 using WpfApp = System.Windows.Application;
 
@@ -22,7 +21,7 @@ public partial class DashboardView : Page
 
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
-        TodayDateText.Text = "📅 " + DateTime.Now.ToString("yyyy 年 M 月 d 日 dddd");
+        TodayDateText.Text = DateTime.Now.ToString("yyyy 年 M 月 d 日 dddd");
         _refreshTimer = new System.Windows.Threading.DispatcherTimer();
         _refreshTimer.Interval = TimeSpan.FromSeconds(3);
         _refreshTimer.Tick += async (s, e2) => await RefreshData();
@@ -35,6 +34,9 @@ public partial class DashboardView : Page
         _refreshTimer?.Stop();
         _refreshTimer = null;
     }
+
+    private void Settings_Click(object sender, RoutedEventArgs e)
+        => NavigationService?.Navigate(new SettingsView());
 
     private void PrevPage_Click(object sender, RoutedEventArgs e)
     {
@@ -64,14 +66,17 @@ public partial class DashboardView : Page
             ActiveTimeText.Text = FormatDuration(summary.TotalActiveSeconds);
             IdleTimeText.Text = FormatDuration(summary.TotalIdleSeconds);
 
-            // 百分比
             if (totalSec > 0)
             {
                 ActivePctText.Text = (summary.TotalActiveSeconds * 100 / totalSec) + "%";
                 IdlePctText.Text = (summary.TotalIdleSeconds * 100 / totalSec) + "%";
             }
+            else
+            {
+                ActivePctText.Text = "";
+                IdlePctText.Text = "";
+            }
 
-            // 过滤忽略列表
             var ignored = app.Monitor.IgnoredProcesses;
             _allUsage = usage
                 .Where(u => !ignored.Contains(u.ProcessName, StringComparer.OrdinalIgnoreCase))
@@ -111,14 +116,13 @@ public partial class DashboardView : Page
             .Take(PageSize)
             .ToList();
 
-        // 渐变色
         var gradBrushes = new System.Windows.Media.Brush[]
         {
-            (System.Windows.Media.Brush)FindResource("GradBarBlue"),
-            (System.Windows.Media.Brush)FindResource("GradBarGreen"),
-            (System.Windows.Media.Brush)FindResource("GradBarOrange"),
-            (System.Windows.Media.Brush)FindResource("GradBarRed"),
-            (System.Windows.Media.Brush)FindResource("GradBarBlue"),
+            (System.Windows.Media.Brush)FindResource("GradBlue"),
+            (System.Windows.Media.Brush)FindResource("GradGreen"),
+            (System.Windows.Media.Brush)FindResource("GradOrange"),
+            (System.Windows.Media.Brush)FindResource("GradRed"),
+            (System.Windows.Media.Brush)FindResource("GradBlue"),
         };
 
         for (int i = 0; i < pageItems.Count; i++)
@@ -136,19 +140,17 @@ public partial class DashboardView : Page
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(70) });
 
-            // 排名标
             var rankText = new TextBlock
             {
                 Text = "#" + (_currentPage * PageSize + i + 1),
                 FontSize = 10,
-                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x3D, 0x3D, 0x5C)),
+                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x70, 0x70, 0x90)),
                 VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Thickness(0, 0, 6, 0)
             };
             Grid.SetColumn(rankText, 0);
             row.Children.Add(rankText);
 
-            // 应用名
             var nameText = new TextBlock
             {
                 Text = item.ProcessName,
@@ -157,40 +159,37 @@ public partial class DashboardView : Page
                 FontWeight = FontWeights.SemiBold,
                 TextTrimming = TextTrimming.CharacterEllipsis,
                 ToolTip = item.ProcessName + " - " + FormatDuration(item.TotalSeconds),
-                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xE8, 0xE8, 0xF8))
+                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xF0, 0xF0, 0xFF))
             };
             nameText.MouseDown += (s, e2) => NavigateToDetail(item.ProcessName);
             Grid.SetColumn(nameText, 0);
             row.Children.Add(nameText);
 
-            // 柱状条外层（圆角容器）
-            var barOuter = new Border
+            var barBg = new Border
             {
                 Height = 22,
                 CornerRadius = new CornerRadius(6),
-                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x0E, 0x0E, 0x20)),
+                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x1A, 0x1A, 0x30)),
                 VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Thickness(8, 0, 8, 0)
             };
 
-            // 柱状条内层（渐变填充）
-            var barInner = new Border
+            var barFill = new Border
             {
                 Height = 22,
                 CornerRadius = new CornerRadius(6),
                 Background = gradBrushes[i % gradBrushes.Length],
                 HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
-                Width = System.Math.Max(30, pct * (500)),
+                Width = System.Math.Max(30, pct * 500),
                 Cursor = System.Windows.Input.Cursors.Hand,
                 ToolTip = item.ProcessName + " - " + FormatDuration(item.TotalSeconds)
             };
-            barInner.MouseDown += (s, e2) => NavigateToDetail(item.ProcessName);
-            barOuter.Child = barInner;
+            barFill.MouseDown += (s, e2) => NavigateToDetail(item.ProcessName);
+            barBg.Child = barFill;
 
-            Grid.SetColumn(barOuter, 1);
-            row.Children.Add(barOuter);
+            Grid.SetColumn(barBg, 1);
+            row.Children.Add(barBg);
 
-            // 时长
             var durText = new TextBlock
             {
                 Text = FormatDuration(item.TotalSeconds),
@@ -198,18 +197,17 @@ public partial class DashboardView : Page
                 HorizontalAlignment = System.Windows.HorizontalAlignment.Right,
                 FontSize = 12,
                 FontWeight = FontWeights.SemiBold,
-                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x6B, 0x6B, 0x8D))
+                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xA0, 0xA0, 0xC0))
             };
             Grid.SetColumn(durText, 2);
             row.Children.Add(durText);
 
-            // 分隔线
             if (i < pageItems.Count - 1)
             {
                 var sep = new Border
                 {
                     Height = 1,
-                    Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x1E, 0x1E, 0x38)),
+                    Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x2F, 0x2F, 0x50)),
                     Margin = new Thickness(16, 0, 16, 0)
                 };
                 ChartPanel.Children.Add(sep);
@@ -218,7 +216,6 @@ public partial class DashboardView : Page
             ChartPanel.Children.Add(row);
         }
 
-        // 分页
         var totalPages = MaxPage + 1;
         if (totalPages > 1)
         {

@@ -3,65 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="屏幕监控" Height="680" Width="1000"
         WindowStartupLocation="CenterScreen"
-        Background="#0B0B1A"
-        WindowStyle="SingleBorderWindow"
-        AllowsTransparency="False">
+        Background="#1B1B2F">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="200"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-
-        <!-- 侧边栏装饰线 -->
-        <Border Grid.Column="0" Width="1" HorizontalAlignment="Right"
-                Background="#1E1E38"/>
-
-        <!-- Sidebar -->
-        <Border Background="#080812" Grid.Column="0">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
-
-                <!-- Logo区 -->
-                <StackPanel Grid.Row="0" Margin="20,25,20,30">
-                    <TextBlock Text="屏幕监控" FontSize="20" FontWeight="Bold"
-                               Foreground="#E8E8F8"/>
-                    <TextBlock Text="App Usage Tracker" FontSize="10"
-                               Foreground="#3D3D5C" Margin="0,4,0,0"
-                               FontFamily="Segoe UI"/>
-                    <!-- 装饰线 -->
-                    <Border Height="2" CornerRadius="1" Margin="0,15,0,0">
-                        <Border.Background>
-                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
-                                <GradientStop Color="#6366F1" Offset="0.0"/>
-                                <GradientStop Color="#A855F7" Offset="1.0"/>
-                            </LinearGradientBrush>
-                        </Border.Background>
-                    </Border>
-                </StackPanel>
-
-                <!-- 导航按钮 -->
-                <StackPanel Grid.Row="1" Margin="8,0,8,0">
-                    <Button x:Name="BtnDashboard" Content="     概览" 
-                            Style="{StaticResource SidebarBtn}"
-                            Click="Dashboard_Click"/>
-                    <Button x:Name="BtnReports" Content="     报表" 
-                            Style="{StaticResource SidebarBtn}"
-                            Click="Reports_Click"/>
-                    <Button x:Name="BtnSettings" Content="     设置" 
-                            Style="{StaticResource SidebarBtn}"
-                            Click="Settings_Click"/>
-                </StackPanel>
-            </Grid>
-        </Border>
-
-        <!-- 内容区域 -->
-        <Border Grid.Column="1" Margin="0">
-            <Frame x:Name="ContentFrame" NavigationUIVisibility="Hidden"
-                   Background="Transparent"/>
-        </Border>
+        <Frame x:Name="ContentFrame" NavigationUIVisibility="Hidden"
+               Background="Transparent"/>
     </Grid>
 </Window>
-

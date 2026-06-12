@@ -1,6 +1,5 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-
 using WpfApp = System.Windows.Application;
 using WpfMsgBox = System.Windows.MessageBox;
 
@@ -30,13 +29,16 @@ public partial class SettingsView : Page
         else
         {
             StatusText.Text = "已暂停";
-            StatusDot.Fill = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x6B, 0x6B, 0x8D));
-            StatusText.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x6B, 0x6B, 0x8D));
+            StatusDot.Fill = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x70, 0x70, 0x90));
+            StatusText.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x70, 0x70, 0x90));
         }
 
         IgnoreList.ItemsSource = app.Monitor.IgnoredProcesses;
         IgnoreList.Items.Refresh();
     }
+
+    private void Back_Click(object sender, RoutedEventArgs e)
+        => NavigationService?.GoBack();
 
     private void AddIgnore_Click(object sender, RoutedEventArgs e)
     {
@@ -70,4 +72,3 @@ public partial class SettingsView : Page
         }
     }
 }
-
