@@ -1,20 +1,20 @@
 ﻿<Page x:Class="ScreenMonitor.UI.Views.TimelineView"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      Title="Timeline" Background="Transparent">
+      Title="时间线" Background="Transparent">
     <ScrollViewer>
         <StackPanel Margin="10">
-            <TextBlock Text="Timeline" FontSize="24" FontWeight="Bold" Margin="0,0,0,10"/>
-            <TextBlock Text="Select a day to view the timeline of application usage." Foreground="#888" Margin="0,0,0,15"/>
+            <TextBlock Text="时间线" FontSize="24" FontWeight="Bold" Margin="0,0,0,10"/>
+            <TextBlock Text="选择日期查看应用使用时间线。" Foreground="#888" Margin="0,0,0,15"/>
 
             <WrapPanel Margin="0,0,0,15">
-                <TextBlock Text="Date:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBlock Text="日期：" VerticalAlignment="Center" Margin="0,0,8,0"/>
                 <DatePicker x:Name="TimelineDatePicker" SelectedDateChanged="OnDateChanged"/>
             </WrapPanel>
 
             <Border Background="White" CornerRadius="8" Padding="15">
                 <StackPanel>
-                    <TextBlock Text="Usage Timeline (each block = 15 min)" FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
+                    <TextBlock Text="使用时间线（每格 = 15 分钟）" FontSize="14" FontWeight="Bold" Margin="0,0,0,10"/>
                     <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="500">
                         <ItemsControl x:Name="TimelinePanel" />
                     </ScrollViewer>

@@ -31,27 +31,39 @@ public partial class App : System.Windows.Application
         _aggregation = new DataAggregationService(_repository);
         _monitor = new WindowMonitorService(_repository, _idleDetector);
 
+        // 设置忽略列表持久化文件
+        var ignorePath = System.IO.Path.Combine(
+            AppDomain.CurrentDomain.BaseDirectory, "ignorelist.json");
+        ((WindowMonitorService)_monitor).SetIgnoreFilePath(ignorePath);
+
         _trayIcon = new NotifyIcon();
-        _trayIcon.Text = "Screen Monitor";
+        _trayIcon.Text = "屏幕监控";
         _trayIcon.Icon = CreateAppIcon();
         _trayIcon.Visible = true;
 
         var menu = new ContextMenuStrip();
-        menu.Items.Add("Open", null, (s, e2) => ShowMainWindow());
+        menu.Items.Add("打开", null, (s, e2) => ShowMainWindow());
         menu.Items.Add(new ToolStripSeparator());
-        menu.Items.Add("Pause/Resume", null, (s, e2) => ToggleMonitor());
+        menu.Items.Add("暂停/恢复", null, (s, e2) => ToggleMonitor());
         menu.Items.Add(new ToolStripSeparator());
-        menu.Items.Add("Exit", null, (s, e2) => ExitApp());
+        menu.Items.Add("退出", null, (s, e2) => ExitApp());
         _trayIcon.ContextMenuStrip = menu;
         _trayIcon.DoubleClick += (s, e2) => ShowMainWindow();
 
         _mainWindow = new MainWindow();
+        MainWindow = _mainWindow;
+        _mainWindow.Title = "屏幕监控";
+        _mainWindow.WindowState = System.Windows.WindowState.Normal;
+        _mainWindow.ShowInTaskbar = true;
+        _mainWindow.Show();
+        _mainWindow.Activate();
+
         _mainWindow.Closing += (s, e2) =>
         {
             e2.Cancel = true;
             _mainWindow.Hide();
-            _trayIcon.ShowBalloonTip(1000, "Screen Monitor",
-                "Minimized to tray, monitoring continues...",
+            _trayIcon.ShowBalloonTip(1000, "屏幕监控",
+                "已最小化到托盘，监控继续中...",
                 ToolTipIcon.Info);
         };
 
@@ -72,12 +84,12 @@ public partial class App : System.Windows.Application
         if (_monitor.IsRunning)
         {
             _monitor.Stop();
-            _trayIcon!.ShowBalloonTip(1000, "Screen Monitor", "Monitoring paused", ToolTipIcon.Info);
+            _trayIcon!.ShowBalloonTip(1000, "屏幕监控", "监控已暂停", ToolTipIcon.Info);
         }
         else
         {
             _monitor.Start();
-            _trayIcon!.ShowBalloonTip(1000, "Screen Monitor", "Monitoring resumed", ToolTipIcon.Info);
+            _trayIcon!.ShowBalloonTip(1000, "屏幕监控", "监控已恢复", ToolTipIcon.Info);
         }
     }
 

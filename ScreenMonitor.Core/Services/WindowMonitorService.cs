@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Text;
+using System.Text.Json;
 using ScreenMonitor.Core.Interfaces;
 using ScreenMonitor.Core.Models;
 using ScreenMonitor.Core.Win32;
@@ -15,6 +16,7 @@ public class WindowMonitorService : IWindowMonitorService, IDisposable
     private ActivitySession? _currentSession;
     private readonly ISessionRepository _repository;
     private readonly IIdleDetectionService _idleDetector;
+    private string? _ignoreFilePath;
 
     public bool IsRunning { get; private set; }
     public List<string> IgnoredProcesses { get; set; } = new();
@@ -27,6 +29,47 @@ public class WindowMonitorService : IWindowMonitorService, IDisposable
     {
         _repository = repository;
         _idleDetector = idleDetector;
+    }
+
+    /// <summary>
+    /// 设置忽略列表文件路径并在存在时自动加载
+    /// </summary>
+    public void SetIgnoreFilePath(string path)
+    {
+        _ignoreFilePath = path;
+        LoadIgnoreList();
+    }
+
+    /// <summary>
+    /// 保存忽略列表到文件
+    /// </summary>
+    public void SaveIgnoreList()
+    {
+        if (_ignoreFilePath == null) return;
+        try
+        {
+            var dir = System.IO.Path.GetDirectoryName(_ignoreFilePath);
+            if (dir != null && !System.IO.Directory.Exists(dir))
+                System.IO.Directory.CreateDirectory(dir);
+            var json = JsonSerializer.Serialize(IgnoredProcesses, new JsonSerializerOptions { WriteIndented = true });
+            System.IO.File.WriteAllText(_ignoreFilePath, json);
+        }
+        catch { }
+    }
+
+    /// <summary>
+    /// 从文件加载忽略列表
+    /// </summary>
+    public void LoadIgnoreList()
+    {
+        if (_ignoreFilePath == null || !System.IO.File.Exists(_ignoreFilePath)) return;
+        try
+        {
+            var json = System.IO.File.ReadAllText(_ignoreFilePath);
+            var list = JsonSerializer.Deserialize<List<string>>(json);
+            if (list != null) IgnoredProcesses = list;
+        }
+        catch { }
     }
 
     public void Start()
@@ -99,20 +142,17 @@ public class WindowMonitorService : IWindowMonitorService, IDisposable
                 _currentSession.ProcessName == processName &&
                 _currentSession.WindowTitle == title)
             {
-                // 合并：更新结束时间和时长
                 _currentSession.EndTime = now;
                 _currentSession.DurationSeconds = (long)(now - _currentSession.StartTime).TotalSeconds;
                 OnSessionUpdated?.Invoke(_currentSession);
             }
             else
             {
-                // 关闭旧会话
                 if (_currentSession != null)
                 {
                     CloseCurrentSessionAsync().ConfigureAwait(false).GetAwaiter().GetResult();
                 }
 
-                // 创建新会话
                 _currentSession = new ActivitySession
                 {
                     ProcessName = processName,
@@ -130,7 +170,6 @@ public class WindowMonitorService : IWindowMonitorService, IDisposable
         }
         catch
         {
-            // 采集异常不抛到上层，静默忽略（某些进程句柄可能已失效）
         }
     }
 

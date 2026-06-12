@@ -1,0 +1,38 @@
+﻿<Page x:Class="ScreenMonitor.UI.Views.AppDetailView"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      Title="应用详情" Background="#131428">
+    <ScrollViewer>
+        <StackPanel Margin="10">
+            <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                <Button Content="← 返回概览" Click="Back_Click" 
+                        Background="Transparent" BorderThickness="0"
+                        Cursor="Hand" FontSize="14" Foreground="#4A8EFF"
+                        Padding="0" VerticalAlignment="Center"/>
+            </StackPanel>
+
+            <Border Background="#1C1E3A" CornerRadius="10" Padding="20"
+                    Margin="0,0,0,15" BorderThickness="1" BorderBrush="#2A2C4A">
+                <StackPanel>
+                    <TextBlock x:Name="AppNameText" FontSize="24" FontWeight="Bold"
+                               Foreground="#E8E8F0" Margin="0,0,0,5"/>
+                    <TextBlock x:Name="TotalTimeText" FontSize="14" Foreground="#7A7C94"/>
+                </StackPanel>
+            </Border>
+
+            <Border Background="#1C1E3A" CornerRadius="10" Padding="20"
+                    BorderThickness="1" BorderBrush="#2A2C4A">
+                <StackPanel>
+                    <TextBlock Text="过去 24 小时使用分布" FontSize="16" FontWeight="Bold"
+                               Foreground="#E8E8F0" Margin="0,0,0,15"/>
+                    <StackPanel x:Name="ChartContainer" />
+                    <WrapPanel x:Name="XAxisPanel" Margin="60,5,0,0" />
+                </StackPanel>
+            </Border>
+
+            <TextBlock x:Name="NoDataText" Text="暂无该应用的使用数据"
+                       Foreground="#505270" FontSize="14" Visibility="Collapsed"
+                       Margin="0,20,0,0" HorizontalAlignment="Center"/>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

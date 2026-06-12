@@ -50,7 +50,7 @@ public partial class ReportView : Page
     {
         var dialog = new Microsoft.Win32.SaveFileDialog
         {
-            Filter = "CSV files (*.csv)|*.csv",
+            Filter = "CSV 文件 (*.csv)|*.csv",
             FileName = "screen-monitor-" + DateTime.Today.ToString("yyyy-MM-dd") + ".csv"
         };
         if (dialog.ShowDialog() == true)
@@ -58,7 +58,7 @@ public partial class ReportView : Page
             var app = (App)WpfApp.Current;
             var date = DateOnly.FromDateTime(ReportDatePicker.SelectedDate ?? DateTime.Today);
             await app.Aggregation.ExportToCsvAsync(dialog.FileName, date, date);
-            WpfMsgBox.Show("CSV exported successfully.", "Export", MessageBoxButton.OK, MessageBoxImage.Information);
+            WpfMsgBox.Show("CSV 导出成功。", "导出", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
 
@@ -66,7 +66,7 @@ public partial class ReportView : Page
     {
         var dialog = new Microsoft.Win32.SaveFileDialog
         {
-            Filter = "JSON files (*.json)|*.json",
+            Filter = "JSON 文件 (*.json)|*.json",
             FileName = "screen-monitor-" + DateTime.Today.ToString("yyyy-MM-dd") + ".json"
         };
         if (dialog.ShowDialog() == true)
@@ -74,16 +74,16 @@ public partial class ReportView : Page
             var app = (App)WpfApp.Current;
             var date = DateOnly.FromDateTime(ReportDatePicker.SelectedDate ?? DateTime.Today);
             await app.Aggregation.ExportToJsonAsync(dialog.FileName, date, date);
-            WpfMsgBox.Show("JSON exported successfully.", "Export", MessageBoxButton.OK, MessageBoxImage.Information);
+            WpfMsgBox.Show("JSON 导出成功。", "导出", MessageBoxButton.OK, MessageBoxImage.Information);
         }
     }
 
     private static string FormatDuration(long seconds)
     {
-        if (seconds < 60) return seconds + "s";
-        if (seconds < 3600) return (seconds / 60) + "m " + (seconds % 60) + "s";
+        if (seconds < 60) return seconds + " 秒";
+        if (seconds < 3600) return (seconds / 60) + " 分 " + (seconds % 60) + " 秒";
         var h = seconds / 3600;
         var m = (seconds % 3600) / 60;
-        return h + "h " + m + "m";
+        return h + " 时 " + m + " 分";
     }
 }

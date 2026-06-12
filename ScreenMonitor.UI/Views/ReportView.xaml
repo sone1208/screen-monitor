@@ -1,45 +1,54 @@
 ﻿<Page x:Class="ScreenMonitor.UI.Views.ReportView"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-      Title="Reports" Background="Transparent">
+      Title="报表" Background="#131428">
     <ScrollViewer>
         <StackPanel Margin="10">
-            <TextBlock Text="Usage Reports" FontSize="24" FontWeight="Bold" Margin="0,0,0,10"/>
+            <TextBlock Text="使用报表" FontSize="24" FontWeight="Bold"
+                       Foreground="#E8E8F0" Margin="0,0,0,10"/>
 
             <WrapPanel Margin="0,0,0,15">
-                <TextBlock Text="Date:" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                <TextBlock Text="日期：" VerticalAlignment="Center" Foreground="#B8B8D0" Margin="0,0,8,0"/>
                 <DatePicker x:Name="ReportDatePicker" SelectedDateChanged="OnDateChanged" Margin="0,0,15,0"/>
-                <Button Content="Export CSV" Click="ExportCsv_Click" Padding="10,5" Margin="0,0,8,0"/>
-                <Button Content="Export JSON" Click="ExportJson_Click" Padding="10,5"/>
+                <Button Content="导出 CSV" Click="ExportCsv_Click" Padding="10,5" Margin="0,0,8,0"
+                        Background="#2A2C4A" Foreground="#B8B8D0" BorderThickness="1" BorderBrush="#3A3C5A"/>
+                <Button Content="导出 JSON" Click="ExportJson_Click" Padding="10,5"
+                        Background="#2A2C4A" Foreground="#B8B8D0" BorderThickness="1" BorderBrush="#3A3C5A"/>
             </WrapPanel>
 
-            <!-- Summary cards -->
             <WrapPanel Margin="0,0,0,15">
-                <Border Background="White" CornerRadius="8" Padding="15" Margin="0,0,10,0" Width="200">
+                <Border Background="#1C1E3A" CornerRadius="10" Padding="15"
+                        Margin="0,0,10,10" Width="180" BorderThickness="1" BorderBrush="#2A2C4A">
                     <StackPanel>
-                        <TextBlock Text="Total Active" FontSize="12" Foreground="#888"/>
-                        <TextBlock x:Name="RptActiveText" Text="--" FontSize="22" FontWeight="Bold"/>
+                        <TextBlock Text="活跃总时长" FontSize="12" Foreground="#7A7C94"/>
+                        <TextBlock x:Name="RptActiveText" Text="--" FontSize="20" FontWeight="Bold"
+                                   Foreground="#E8E8F0" TextTrimming="CharacterEllipsis"
+                                   ToolTip="{Binding Text, RelativeSource={RelativeSource Self}}"/>
                     </StackPanel>
                 </Border>
-                <Border Background="White" CornerRadius="8" Padding="15" Width="200">
+                <Border Background="#1C1E3A" CornerRadius="10" Padding="15"
+                        Width="180" BorderThickness="1" BorderBrush="#2A2C4A">
                     <StackPanel>
-                        <TextBlock Text="Sessions" FontSize="12" Foreground="#888"/>
-                        <TextBlock x:Name="RptSessionsText" Text="--" FontSize="22" FontWeight="Bold"/>
+                        <TextBlock Text="会话数" FontSize="12" Foreground="#7A7C94"/>
+                        <TextBlock x:Name="RptSessionsText" Text="--" FontSize="20" FontWeight="Bold" Foreground="#E8E8F0"/>
                     </StackPanel>
                 </Border>
             </WrapPanel>
 
-            <!-- Session list -->
-            <Border Background="White" CornerRadius="8" Padding="15">
+            <Border Background="#1C1E3A" CornerRadius="10" Padding="15"
+                    BorderThickness="1" BorderBrush="#2A2C4A">
                 <StackPanel>
-                    <TextBlock Text="Session Details" FontSize="16" FontWeight="Bold" Margin="0,0,0,10"/>
-                    <ListView x:Name="SessionList" Height="350">
+                    <TextBlock Text="会话详情" FontSize="16" FontWeight="Bold"
+                               Foreground="#E8E8F0" Margin="0,0,0,10"/>
+                    <ListView x:Name="SessionList" Height="350"
+                              Background="#1C1E3A" Foreground="#E8E8F0"
+                              BorderThickness="1" BorderBrush="#2A2C4A">
                         <ListView.View>
                             <GridView>
-                                <GridViewColumn Header="App" Width="120" DisplayMemberBinding="{Binding ProcessName}"/>
-                                <GridViewColumn Header="Window" Width="200" DisplayMemberBinding="{Binding WindowTitle}"/>
-                                <GridViewColumn Header="Start" Width="130" DisplayMemberBinding="{Binding StartTime}"/>
-                                <GridViewColumn Header="Duration" Width="80" DisplayMemberBinding="{Binding DurationText}"/>
+                                <GridViewColumn Header="应用" Width="120" DisplayMemberBinding="{Binding ProcessName}"/>
+                                <GridViewColumn Header="窗口" Width="200" DisplayMemberBinding="{Binding WindowTitle}"/>
+                                <GridViewColumn Header="开始时间" Width="130" DisplayMemberBinding="{Binding StartTime}"/>
+                                <GridViewColumn Header="时长" Width="80" DisplayMemberBinding="{Binding DurationText}"/>
                             </GridView>
                         </ListView.View>
                     </ListView>

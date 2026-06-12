@@ -21,8 +21,8 @@ public partial class SettingsView : Page
             System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data.json"));
 
         StatusText.Text = app.Monitor.IsRunning
-            ? "Running - collecting data"
-            : "Paused";
+            ? "运行中 - 正在采集数据"
+            : "已暂停";
 
         IgnoreList.ItemsSource = app.Monitor.IgnoredProcesses;
         IgnoreList.Items.Refresh();
@@ -38,6 +38,9 @@ public partial class SettingsView : Page
         {
             app.Monitor.IgnoredProcesses.Add(name);
             IgnoreList.Items.Refresh();
+            // 保存到文件
+            if (app.Monitor is ScreenMonitor.Core.Services.WindowMonitorService svc)
+                svc.SaveIgnoreList();
         }
         IgnoreInput.Clear();
     }
@@ -48,12 +51,12 @@ public partial class SettingsView : Page
         {
             var app = (App)WpfApp.Current;
             var deleted = await app.Aggregation.CleanupOldDataAsync(days);
-            WpfMsgBox.Show("Cleaned up " + deleted + " old records.", "Data Retention",
+            WpfMsgBox.Show("已清理 " + deleted + " 条过期记录。", "数据保留",
                 MessageBoxButton.OK, MessageBoxImage.Information);
         }
         else
         {
-            WpfMsgBox.Show("Please enter a valid number of days.", "Error",
+            WpfMsgBox.Show("请输入有效的天数。", "错误",
                 MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }

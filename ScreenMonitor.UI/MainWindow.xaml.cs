@@ -18,9 +18,6 @@ public partial class MainWindow : Window
     private void Reports_Click(object sender, RoutedEventArgs e)
         => ContentFrame.Navigate(new ReportView());
 
-    private void Timeline_Click(object sender, RoutedEventArgs e)
-        => ContentFrame.Navigate(new TimelineView());
-
     private void Settings_Click(object sender, RoutedEventArgs e)
         => ContentFrame.Navigate(new SettingsView());
 }
