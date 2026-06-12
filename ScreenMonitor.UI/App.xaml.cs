@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using System.Diagnostics;
+using System.Drawing;
 using System.Windows.Forms;
 using ScreenMonitor.Core.Data;
 using ScreenMonitor.Core.Interfaces;
@@ -94,28 +95,43 @@ public partial class App : System.Windows.Application
         }
     }
 
-    private async void ExitApp()
+    // 同步退出，避免 async void 导致消息循环残留
+    private void ExitApp()
     {
         _isExiting = true;
+
+        // 1. 停止监控并保存数据
         try
         {
             _monitor?.Stop();
-            if (_aggregation != null)
-                await _aggregation.CloseAllActiveSessionsAsync();
+            (_monitor as IDisposable)?.Dispose();
         }
         catch { }
 
-        (_monitor as IDisposable)?.Dispose();
+        try
+        {
+            if (_aggregation != null)
+                _aggregation.CloseAllActiveSessionsAsync()
+                    .GetAwaiter().GetResult();
+        }
+        catch { }
 
+        // 2. 销毁托盘图标（必须，否则 WinForms 消息循环会阻止退出）
         if (_trayIcon != null)
         {
             _trayIcon.Visible = false;
             _trayIcon.Dispose();
+            _trayIcon = null;
         }
-        _mainWindow?.Close();
 
+        // 3. 关闭主窗口
+        try { _mainWindow?.Close(); } catch { }
+
+        // 4. 关闭 WPF 调度器
         try { System.Windows.Application.Current.Shutdown(); } catch { }
-        System.Environment.Exit(0);
+
+        // 5. 强制终止当前进程，确保没有任何残留
+        try { Process.GetCurrentProcess().Kill(); } catch { }
     }
 
     private static Icon CreateAppIcon()
