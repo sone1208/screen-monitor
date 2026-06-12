@@ -1,44 +1,9 @@
-﻿## .NET
-bin/
-obj/
+﻿.dotnet/
+.git-tmp-home/
+publish/
+*.log
 *.user
 *.suo
-*.userosscache
-*.sln.docstates
+bin/
+obj/
 .vs/
-
-## NuGet
-packages/
-*.nupkg
-
-## Build results
-[Dd]ebug/
-[Rr]elease/
-x64/
-x86/
-bld/
-[Bb]in/
-[Oo]bj/
-[Ll]og/
-[Ll]ogs/
-
-## Self-publish
-publish/
-
-## Temp files
-*.tmp
-*.temp
-[Tt]emp/
-
-## IDE
-.idea/
-*.swp
-*~
-
-## OS
-Thumbs.db
-Desktop.ini
-.DS_Store
-
-## .NET CLI local cache
-.dotnet/
