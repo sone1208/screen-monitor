@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using ScreenMonitor.Core.Data;
 using ScreenMonitor.Core.Interfaces;
@@ -16,6 +17,7 @@ public partial class App : System.Windows.Application
     private ISessionRepository? _repository;
     private IDataAggregationService? _aggregation;
     private bool _isExiting;
+    private System.Threading.Mutex? _singleInstanceMutex;
 
     public ISessionRepository Repository => _repository!;
     public IWindowMonitorService Monitor => _monitor!;
@@ -24,6 +26,25 @@ public partial class App : System.Windows.Application
 
     protected override void OnStartup(System.Windows.StartupEventArgs e)
     {
+        // 单实例检测
+        _singleInstanceMutex = new System.Threading.Mutex(true, "ScreenMonitor_SingleInstance", out bool createdNew);
+        if (!createdNew)
+        {
+            // 已有实例运行 → 把它的窗口唤起到前台
+            try
+            {
+                var hWnd = FindWindow(null, "屏幕监控");
+                if (hWnd != IntPtr.Zero)
+                {
+                    ShowWindowAsync(hWnd, SW_RESTORE);
+                    SetForegroundWindow(hWnd);
+                }
+            }
+            catch { }
+            Environment.Exit(0);
+            return;
+        }
+
         base.OnStartup(e);
 
         var dbPath = System.IO.Path.Combine(
@@ -92,12 +113,10 @@ public partial class App : System.Windows.Application
         }
     }
 
-    // 同步退出，避免 async void 导致消息循环残留
     private void ExitApp()
     {
         _isExiting = true;
 
-        // 1. 停止监控并保存数据
         try
         {
             _monitor?.Stop();
@@ -112,7 +131,6 @@ public partial class App : System.Windows.Application
         }
         catch { }
 
-        // 2. 销毁托盘图标（必须，否则 WinForms 消息循环会阻止退出）
         if (_trayIcon != null)
         {
             _trayIcon.Visible = false;
@@ -120,15 +138,25 @@ public partial class App : System.Windows.Application
             _trayIcon = null;
         }
 
-        // 3. 关闭主窗口
+        _singleInstanceMutex?.ReleaseMutex();
+        _singleInstanceMutex?.Dispose();
+
         try { _mainWindow?.Close(); } catch { }
-
-        // 4. 关闭 WPF 调度器
         try { System.Windows.Application.Current.Shutdown(); } catch { }
-
-        // 5. 强制终止当前进程，确保没有任何残留
         try { Process.GetCurrentProcess().Kill(); } catch { }
     }
+
+    // Win32 API
+    private const int SW_RESTORE = 9;
+
+    [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+    private static extern IntPtr FindWindow(string? lpClassName, string lpWindowName);
+
+    [DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
 
     private static Icon CreateAppIcon()
     {
@@ -141,5 +169,3 @@ public partial class App : System.Windows.Application
         return Icon.FromHandle(bmp.GetHicon());
     }
 }
-
-
