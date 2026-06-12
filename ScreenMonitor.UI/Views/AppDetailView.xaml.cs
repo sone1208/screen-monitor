@@ -40,15 +40,11 @@ public partial class AppDetailView : Page
             if (appSessions.Count == 0)
             {
                 NoDataText.Visibility = Visibility.Visible;
-                ChartGrid.Visibility = Visibility.Collapsed;
-                XAxisPanel.Visibility = Visibility.Collapsed;
                 TotalTimeText.Text = "总使用时间：0 分钟";
                 return;
             }
 
             NoDataText.Visibility = Visibility.Collapsed;
-            ChartGrid.Visibility = Visibility.Visible;
-            XAxisPanel.Visibility = Visibility.Visible;
 
             var totalSeconds = appSessions.Sum(s => s.DurationSeconds);
             TotalTimeText.Text = "总使用时间：" + FormatDuration(totalSeconds);
@@ -88,91 +84,94 @@ public partial class AppDetailView : Page
     private void RenderChart(long[] hourlySeconds, DateTime fromHour)
     {
         ChartGrid.Children.Clear();
+        ChartGrid.RowDefinitions.Clear();
+        ChartGrid.ColumnDefinitions.Clear();
+        ChartGrid.RowDefinitions.Add(new RowDefinition());
+        ChartGrid.ColumnDefinitions.Add(new ColumnDefinition());
 
-        double chartHeight = 260;
+        double chartHeight = 240;
         double maxMinutes = 60.0;
         int totalSlots = 24;
-        double colWidth = 560.0 / totalSlots;
 
-        // 参考线
-        for (int i = 1; i <= 3; i++)
+        double availWidth = ChartGrid.ActualWidth > 100 ? ChartGrid.ActualWidth : 560;
+        double colW = availWidth / totalSlots;
+
+        // 6 条水平参考线（每 10 分钟一条）
+        for (int m = 10; m <= 60; m += 10)
         {
+            double ratio = m / maxMinutes;
+            double y = chartHeight * (1 - ratio);
             var line = new Border
             {
                 Height = 1,
-                VerticalAlignment = VerticalAlignment.Bottom,
-                Margin = new Thickness(0, 0, 0, chartHeight * i / 4),
-                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x2F, 0x2F, 0x50))
+                VerticalAlignment = VerticalAlignment.Top,
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch,
+                Margin = new Thickness(0, y, 0, 0),
+                Background = new System.Windows.Media.SolidColorBrush(
+                    m % 30 == 0
+                        ? System.Windows.Media.Color.FromRgb(0x3A, 0x3A, 0x5C)
+                        : System.Windows.Media.Color.FromRgb(0x2A, 0x2A, 0x48))
             };
             ChartGrid.Children.Add(line);
         }
 
-        // 使用正确的资源名
-        System.Windows.Media.Brush gradLow = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x3B, 0x82, 0xF6));
-        System.Windows.Media.Brush gradMid = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xF5, 0x9E, 0x0B));
-        System.Windows.Media.Brush gradHigh = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xEF, 0x44, 0x44));
-
-        // 尝试从资源获取渐变刷
-        try
+        // Y 轴刻度（0, 15, 30, 45, 60）
+        var yLabels = new[] {
+            new { Text = "60", Top = 0.0 },
+            new { Text = "45", Top = chartHeight * 0.25 },
+            new { Text = "30", Top = chartHeight * 0.5 },
+            new { Text = "15", Top = chartHeight * 0.75 },
+            new { Text = "0", Top = chartHeight - 14.0 }
+        };
+        foreach (var yl in yLabels)
         {
-            gradLow = (System.Windows.Media.Brush)FindResource("GradBlue");
-            gradMid = (System.Windows.Media.Brush)FindResource("GradOrange");
-            gradHigh = (System.Windows.Media.Brush)FindResource("GradRed");
+            var lbl = new TextBlock
+            {
+                Text = yl.Text + "分",
+                FontSize = 9,
+                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x70, 0x70, 0x90)),
+                Margin = new Thickness(-48, yl.Top, 0, 0),
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Top
+            };
+            ChartGrid.Children.Add(lbl);
         }
-        catch { }
+
+        // 柱子颜色
+        var clrNormal = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x3B, 0x82, 0xF6));
+        var clrEmpty = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x1A, 0x1A, 0x30));
+
+        double maxBarH = chartHeight;
 
         for (int i = 0; i < totalSlots; i++)
         {
-            var minUsed = hourlySeconds[i] / 60.0;
-            var barH = (minUsed / maxMinutes) * chartHeight;
+            var usedMin = hourlySeconds[i] / 60.0;
+            var barH = Math.Min((usedMin / maxMinutes) * maxBarH, maxBarH);
             if (barH < 0) barH = 0;
-            if (barH > chartHeight) barH = chartHeight;
-            if (barH < 1 && hourlySeconds[i] > 0) barH = 2;
+            if (barH < 1.5 && hourlySeconds[i] > 0) barH = 2;
 
-            System.Windows.Media.Brush barColor;
-            if (hourlySeconds[i] == 0)
-                barColor = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x1A, 0x1A, 0x30));
-            else if (minUsed >= 45)
-                barColor = gradHigh;
-            else if (minUsed >= 15)
-                barColor = gradMid;
-            else
-                barColor = gradLow;
+            var brush = hourlySeconds[i] == 0 ? clrEmpty : clrNormal;
 
+            // 柱子（不含文本标签，避免视觉重叠）
             var bar = new Border
             {
-                Width = colWidth - 3,
+                Width = Math.Max(colW - 2, 2),
                 Height = barH,
                 VerticalAlignment = VerticalAlignment.Bottom,
                 HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
-                CornerRadius = new CornerRadius(3, 3, 0, 0),
-                Margin = new Thickness(i * colWidth + 1, 0, 0, 0),
-                Background = barColor,
+                CornerRadius = new CornerRadius(2, 2, 0, 0),
+                Margin = new Thickness(i * colW + 1, 0, 0, 0),
+                Background = brush,
                 ToolTip = string.Format("{0}:00 - {1}",
                     fromHour.AddHours(i).Hour.ToString("00"),
                     FormatDuration(hourlySeconds[i]))
             };
-
-            if (hourlySeconds[i] > 0)
-            {
-                var glow = new Border
-                {
-                    Width = colWidth - 7,
-                    Height = 2,
-                    CornerRadius = new CornerRadius(2, 2, 0, 0),
-                    VerticalAlignment = VerticalAlignment.Bottom,
-                    HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
-                    Margin = new Thickness(i * colWidth + 3, 0, 0, barH - 2),
-                    Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromArgb(60, 255, 255, 255))
-                };
-                ChartGrid.Children.Add(glow);
-            }
-
             ChartGrid.Children.Add(bar);
         }
 
-        // X轴
+        // X 轴标签（每 2 小时标一个）
         XAxisPanel.Children.Clear();
+        XAxisPanel.Width = availWidth;
         for (int i = 0; i < totalSlots; i += 2)
         {
             var hour = fromHour.AddHours(i).Hour;
@@ -180,7 +179,7 @@ public partial class AppDetailView : Page
             {
                 Text = hour.ToString("00") + ":00",
                 FontSize = 9,
-                Width = colWidth * 2,
+                Width = colW * 2,
                 TextAlignment = TextAlignment.Center,
                 Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x70, 0x70, 0x90))
             };
@@ -199,7 +198,3 @@ public partial class AppDetailView : Page
         return h + " 时 " + m + " 分";
     }
 }
-
-
-
-

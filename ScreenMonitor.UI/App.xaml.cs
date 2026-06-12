@@ -14,6 +14,7 @@ public partial class App : System.Windows.Application
     private IIdleDetectionService? _idleDetector;
     private ISessionRepository? _repository;
     private IDataAggregationService? _aggregation;
+    private bool _isExiting;
 
     public ISessionRepository Repository => _repository!;
     public IWindowMonitorService Monitor => _monitor!;
@@ -59,6 +60,7 @@ public partial class App : System.Windows.Application
 
         _mainWindow.Closing += (s, e2) =>
         {
+            if (_isExiting) return;
             e2.Cancel = true;
             _mainWindow.Hide();
             _trayIcon.ShowBalloonTip(1000, "屏幕监控",
@@ -94,25 +96,26 @@ public partial class App : System.Windows.Application
 
     private async void ExitApp()
     {
+        _isExiting = true;
         try
         {
-            // 先停止监控
             _monitor?.Stop();
-
-            // 关闭活跃会话
             if (_aggregation != null)
                 await _aggregation.CloseAllActiveSessionsAsync();
         }
         catch { }
-        finally
+
+        (_monitor as IDisposable)?.Dispose();
+
+        if (_trayIcon != null)
         {
-            // 清理资源并退出
-            (_monitor as IDisposable)?.Dispose();
-            _trayIcon?.Dispose();
-            _mainWindow?.Close();
-            // 直接退出进程，绕过 Closing 事件
-            System.Windows.Application.Current.Shutdown();
+            _trayIcon.Visible = false;
+            _trayIcon.Dispose();
         }
+        _mainWindow?.Close();
+
+        try { System.Windows.Application.Current.Shutdown(); } catch { }
+        System.Environment.Exit(0);
     }
 
     private static Icon CreateAppIcon()
