@@ -40,7 +40,7 @@ public partial class AppDetailView : Page
             if (appSessions.Count == 0)
             {
                 NoDataText.Visibility = Visibility.Visible;
-                ChartContainer.Visibility = Visibility.Collapsed;
+                ChartGrid.Visibility = Visibility.Collapsed;
                 XAxisPanel.Visibility = Visibility.Collapsed;
                 TotalTimeText.Text = "总使用时间：0 分钟";
                 return;
@@ -49,129 +49,110 @@ public partial class AppDetailView : Page
             var totalSeconds = appSessions.Sum(s => s.DurationSeconds);
             TotalTimeText.Text = "总使用时间：" + FormatDuration(totalSeconds);
 
-            // 按小时统计总使用秒数
+            // 按小时统计
+            var fromHour = new DateTime(from.Year, from.Month, from.Day, from.Hour, 0, 0);
             var hourlySeconds = new long[24];
-            var fromHour = from.Hour; // 起始小时
 
             foreach (var session in appSessions)
             {
-                var start = session.StartTime;
-                var end = session.EndTime;
+                var segStart = session.StartTime > fromHour ? session.StartTime : fromHour;
+                var segEnd = session.EndTime;
 
-                // 跨小时的会话需要拆分到各小时
-                var current = start;
-                while (current < end)
+                while (segStart < segEnd)
                 {
-                    var slotStart = new DateTime(current.Year, current.Month, current.Day, current.Hour, 0, 0);
-                    var slotEnd = slotStart.AddHours(1);
-                    var segEnd = end < slotEnd ? end : slotEnd;
-                    var segSec = (long)(segEnd - current).TotalSeconds;
-                    if (segSec < 0) segSec = 0;
+                    var slotEnd = new DateTime(segStart.Year, segStart.Month, segStart.Day, segStart.Hour, 0, 0).AddHours(1);
+                    var thisEnd = segEnd < slotEnd ? segEnd : slotEnd;
+                    var sec = (long)(thisEnd - segStart).TotalSeconds;
+                    if (sec < 0) sec = 0;
 
-                    var hourIndex = ((current.Hour - fromHour + 24) % 24);
-                    hourlySeconds[hourIndex] += segSec;
-                    current = segEnd;
+                    var idx = (int)((segStart - fromHour).TotalHours);
+                    if (idx >= 0 && idx < 24)
+                        hourlySeconds[idx] += sec;
+
+                    segStart = thisEnd;
                 }
             }
 
-            // 渲染：横向柱状条，每个小时一行
-            var maxBarWidth = 500.0;
-            var maxSecondsPerHour = 3600.0; // 1小时=3600秒=60分钟
-
-            ChartContainer.Children.Clear();
-            for (int i = 0; i < 24; i++)
-            {
-                var hour = (fromHour + i) % 24;
-                var hourLabel = hour.ToString("00") + ":00";
-                var secInHour = hourlySeconds[i];
-                var frac = secInHour / maxSecondsPerHour;
-                if (frac > 1.0) frac = 1.0;
-
-                var row = new Grid { Margin = new Thickness(0, 0, 0, 4) };
-                row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(50) });
-                row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
-                row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(70) });
-
-                // 小时标签
-                var hourText = new TextBlock
-                {
-                    Text = hourLabel,
-                    FontSize = 11,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x99, 0x99, 0x99))
-                };
-                Grid.SetColumn(hourText, 0);
-                row.Children.Add(hourText);
-
-                // 柱状条背景（灰色底）
-                var barBg = new Border
-                {
-                    Height = 20,
-                    CornerRadius = new CornerRadius(3),
-                    Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xEC, 0xF0, 0xF1)),
-                    Margin = new Thickness(4, 0, 4, 0)
-                };
-                Grid.SetColumn(barBg, 1);
-                row.Children.Add(barBg);
-
-                // 柱状条（实际用量）
-                if (frac > 0)
-                {
-                    var bar = new Border
-                    {
-                        Height = 20,
-                        CornerRadius = new CornerRadius(3),
-                        HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
-                        Width = frac * maxBarWidth,
-                        Background = new System.Windows.Media.SolidColorBrush(
-                            secInHour >= 1800
-                                ? System.Windows.Media.Color.FromRgb(0xE7, 0x4C, 0x3C) // >30分 = 红色
-                                : secInHour >= 600
-                                    ? System.Windows.Media.Color.FromRgb(0xF3, 0x9C, 0x12) // 10-30分 = 橙色
-                                    : System.Windows.Media.Color.FromRgb(0x52, 0xBE, 0x80)), // <10分 = 绿色
-                        ToolTip = hourLabel + " 使用 " + FormatDuration(secInHour)
-                    };
-                    Grid.SetColumn(bar, 1);
-                    row.Children.Add(bar);
-                }
-
-                // 时长文本
-                var durText = new TextBlock
-                {
-                    Text = FormatDuration(secInHour),
-                    FontSize = 11,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    HorizontalAlignment = System.Windows.HorizontalAlignment.Right,
-                    Foreground = new System.Windows.Media.SolidColorBrush(
-                        secInHour > 0
-                            ? System.Windows.Media.Color.FromRgb(0x33, 0x33, 0x33)
-                            : System.Windows.Media.Color.FromRgb(0xCC, 0xCC, 0xCC))
-                };
-                Grid.SetColumn(durText, 2);
-                row.Children.Add(durText);
-
-                ChartContainer.Children.Add(row);
-            }
-
-            // X轴标签（每4小时标一个）
-            XAxisPanel.Children.Clear();
-            for (int i = 0; i < 24; i += 4)
-            {
-                var hour = (fromHour + i) % 24;
-                var lbl = new TextBlock
-                {
-                    Text = hour.ToString("00") + ":00",
-                    FontSize = 10,
-                    Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xBB, 0xBB, 0xBB)),
-                    Margin = new Thickness(i % 4 == 0 ? 0 : 15, 0, 15, 0)
-                };
-                XAxisPanel.Children.Add(lbl);
-            }
+            RenderChart(hourlySeconds, fromHour);
         }
         catch (Exception ex)
         {
             NoDataText.Text = "加载数据失败：" + ex.Message;
             NoDataText.Visibility = Visibility.Visible;
+        }
+    }
+
+    private void RenderChart(long[] hourlySeconds, DateTime fromHour)
+    {
+        ChartGrid.Children.Clear();
+
+        double chartHeight = 260;
+        double maxMinutes = 60.0;
+        int totalSlots = 24;
+        double colWidth = 600.0 / totalSlots;
+
+        // 参考线 45分、30分、15分
+        for (int i = 1; i <= 3; i++)
+        {
+            var line = new Border
+            {
+                Height = 1,
+                VerticalAlignment = VerticalAlignment.Bottom,
+                Margin = new Thickness(0, 0, 0, chartHeight * i / 4),
+                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x2A, 0x2C, 0x4A))
+            };
+            ChartGrid.Children.Add(line);
+        }
+
+        // 柱子
+        for (int i = 0; i < totalSlots; i++)
+        {
+            var minUsed = hourlySeconds[i] / 60.0;
+            var barH = (minUsed / maxMinutes) * chartHeight;
+            if (barH < 0) barH = 0;
+            if (barH > chartHeight) barH = chartHeight;
+            if (barH < 1 && hourlySeconds[i] > 0) barH = 2;
+
+            System.Windows.Media.Brush barColor;
+            if (hourlySeconds[i] == 0)
+                barColor = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x1C, 0x1E, 0x3A));
+            else if (minUsed >= 45)
+                barColor = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFF, 0x4D, 0x4F));
+            else if (minUsed >= 15)
+                barColor = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xFA, 0xAD, 0x14));
+            else
+                barColor = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x4A, 0x8E, 0xFF));
+
+            var bar = new Border
+            {
+                Width = colWidth - 4,
+                Height = barH,
+                VerticalAlignment = VerticalAlignment.Bottom,
+                HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
+                CornerRadius = new CornerRadius(3, 3, 0, 0),
+                Margin = new Thickness(i * colWidth + 2, 0, 0, 0),
+                Background = barColor,
+                ToolTip = string.Format("{0}:00 - {1}",
+                    fromHour.AddHours(i).Hour.ToString("00"),
+                    FormatDuration(hourlySeconds[i]))
+            };
+            ChartGrid.Children.Add(bar);
+        }
+
+        // X轴标签
+        XAxisPanel.Children.Clear();
+        for (int i = 0; i < totalSlots; i += 2)
+        {
+            var hour = fromHour.AddHours(i).Hour;
+            var lbl = new TextBlock
+            {
+                Text = hour.ToString("00") + ":00",
+                FontSize = 9,
+                Width = colWidth * 2,
+                TextAlignment = TextAlignment.Center,
+                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x50, 0x52, 0x70))
+            };
+            XAxisPanel.Children.Add(lbl);
         }
     }
 
@@ -186,3 +167,4 @@ public partial class AppDetailView : Page
         return h + " 时 " + m + " 分";
     }
 }
+

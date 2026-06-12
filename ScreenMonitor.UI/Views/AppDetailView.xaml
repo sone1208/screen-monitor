@@ -25,14 +25,50 @@
                 <StackPanel>
                     <TextBlock Text="过去 24 小时使用分布" FontSize="16" FontWeight="Bold"
                                Foreground="#E8E8F0" Margin="0,0,0,15"/>
-                    <StackPanel x:Name="ChartContainer" />
-                    <WrapPanel x:Name="XAxisPanel" Margin="60,5,0,0" />
+
+                    <!-- 柱状图区域 -->
+                    <Grid Height="280" Margin="0,0,0,5">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="20"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="20"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="40"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="40"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Y轴刻度 -->
+                        <StackPanel Grid.Row="0" Grid.Column="0" VerticalAlignment="Top">
+                            <TextBlock Text="60" FontSize="10" Foreground="#505270" HorizontalAlignment="Right" Margin="0,0,5,0"/>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">
+                            <TextBlock Text="30" FontSize="10" Foreground="#505270" HorizontalAlignment="Right" Margin="0,0,5,0"/>
+                        </StackPanel>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="0" FontSize="10" Foreground="#505270" HorizontalAlignment="Right" Margin="0,0,5,0"/>
+
+                        <!-- 分钟刻度线 + 柱状条容器 -->
+                        <Grid x:Name="ChartGrid" Grid.Row="1" Grid.Column="1" VerticalAlignment="Stretch">
+                            <!-- 背景刻度线 -->
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <!-- 3条水平参考线（通过 Border 模拟） -->
+                        </Grid>
+
+                        <!-- X轴标签 -->
+                        <WrapPanel x:Name="XAxisPanel" Grid.Row="2" Grid.Column="1" Margin="0,5,0,0"/>
+                    </Grid>
+
+                    <TextBlock x:Name="NoDataText" Text="暂无该应用的使用数据"
+                               Foreground="#505270" FontSize="14" Visibility="Collapsed"
+                               Margin="0,20,0,0" HorizontalAlignment="Center"/>
                 </StackPanel>
             </Border>
-
-            <TextBlock x:Name="NoDataText" Text="暂无该应用的使用数据"
-                       Foreground="#505270" FontSize="14" Visibility="Collapsed"
-                       Margin="0,20,0,0" HorizontalAlignment="Center"/>
         </StackPanel>
     </ScrollViewer>
 </Page>
