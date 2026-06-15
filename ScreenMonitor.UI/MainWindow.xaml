@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="屏幕监控" Height="680" Width="1000"
         WindowStartupLocation="CenterScreen"
-        Background="#1B1B2F">
+        Background="{StaticResource BgCanvas}">
     <Grid>
         <Frame x:Name="ContentFrame" NavigationUIVisibility="Hidden"
                Background="Transparent"/>

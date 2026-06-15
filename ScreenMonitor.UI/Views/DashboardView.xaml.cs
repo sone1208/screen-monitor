@@ -2,6 +2,7 @@
 using System.Windows.Controls;
 using ScreenMonitor.Core.Models;
 using WpfApp = System.Windows.Application;
+using WpfMedia = System.Windows.Media;
 
 namespace ScreenMonitor.UI.Views;
 
@@ -12,6 +13,12 @@ public partial class DashboardView : Page
     private int _currentPage = 0;
     private const int PageSize = 5;
 
+    private WpfMedia.SolidColorBrush? _textMuted;
+    private WpfMedia.SolidColorBrush? _textPrimary;
+    private WpfMedia.SolidColorBrush? _textSecondary;
+    private WpfMedia.SolidColorBrush? _bgInput;
+    private WpfMedia.SolidColorBrush? _borderSoft;
+
     public DashboardView()
     {
         InitializeComponent();
@@ -19,8 +26,18 @@ public partial class DashboardView : Page
         Unloaded += OnUnloaded;
     }
 
+    private void CacheBrushes()
+    {
+        _textMuted  = (WpfMedia.SolidColorBrush)FindResource("TextMuted");
+        _textPrimary = (WpfMedia.SolidColorBrush)FindResource("TextPrimary");
+        _textSecondary = (WpfMedia.SolidColorBrush)FindResource("TextSecondary");
+        _bgInput    = (WpfMedia.SolidColorBrush)FindResource("BgInput");
+        _borderSoft = (WpfMedia.SolidColorBrush)FindResource("BorderSoft");
+    }
+
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        CacheBrushes();
         TodayDateText.Text = DateTime.Now.ToString("yyyy 年 M 月 d 日 dddd");
         _refreshTimer = new System.Windows.Threading.DispatcherTimer();
         _refreshTimer.Interval = TimeSpan.FromSeconds(3);
@@ -115,13 +132,13 @@ public partial class DashboardView : Page
             .Take(PageSize)
             .ToList();
 
-        var gradBrushes = new System.Windows.Media.Brush[]
+        var gradBrushes = new WpfMedia.Brush[]
         {
-            (System.Windows.Media.Brush)FindResource("GradBlue"),
-            (System.Windows.Media.Brush)FindResource("GradGreen"),
-            (System.Windows.Media.Brush)FindResource("GradOrange"),
-            (System.Windows.Media.Brush)FindResource("GradRed"),
-            (System.Windows.Media.Brush)FindResource("GradBlue"),
+            (WpfMedia.Brush)FindResource("GradBlue"),
+            (WpfMedia.Brush)FindResource("GradGreen"),
+            (WpfMedia.Brush)FindResource("GradAmber"),
+            (WpfMedia.Brush)FindResource("GradRed"),
+            (WpfMedia.Brush)FindResource("GradBlue"),
         };
 
         for (int i = 0; i < pageItems.Count; i++)
@@ -143,7 +160,7 @@ public partial class DashboardView : Page
             {
                 Text = "#" + (_currentPage * PageSize + i + 1),
                 FontSize = 10,
-                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x70, 0x70, 0x90)),
+                Foreground = _textMuted,
                 VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Thickness(0, 0, 6, 0)
             };
@@ -158,7 +175,7 @@ public partial class DashboardView : Page
                 FontWeight = FontWeights.SemiBold,
                 TextTrimming = TextTrimming.CharacterEllipsis,
                 ToolTip = item.ProcessName + " - " + FormatDuration(item.TotalSeconds),
-                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xF0, 0xF0, 0xFF))
+                Foreground = _textPrimary
             };
             nameText.MouseDown += (s, e2) => NavigateToDetail(item.ProcessName);
             Grid.SetColumn(nameText, 0);
@@ -168,7 +185,7 @@ public partial class DashboardView : Page
             {
                 Height = 22,
                 CornerRadius = new CornerRadius(6),
-                Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x1A, 0x1A, 0x30)),
+                Background = _bgInput,
                 VerticalAlignment = VerticalAlignment.Center,
                 Margin = new Thickness(8, 0, 8, 0)
             };
@@ -196,7 +213,7 @@ public partial class DashboardView : Page
                 HorizontalAlignment = System.Windows.HorizontalAlignment.Right,
                 FontSize = 12,
                 FontWeight = FontWeights.SemiBold,
-                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0xA0, 0xA0, 0xC0))
+                Foreground = _textSecondary
             };
             Grid.SetColumn(durText, 2);
             row.Children.Add(durText);
@@ -206,7 +223,7 @@ public partial class DashboardView : Page
                 var sep = new Border
                 {
                     Height = 1,
-                    Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x2F, 0x2F, 0x50)),
+                    Background = _borderSoft,
                     Margin = new Thickness(16, 0, 16, 0)
                 };
                 ChartPanel.Children.Add(sep);

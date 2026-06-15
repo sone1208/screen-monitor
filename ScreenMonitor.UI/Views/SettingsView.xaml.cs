@@ -2,35 +2,43 @@
 using System.Windows.Controls;
 using WpfApp = System.Windows.Application;
 using WpfMsgBox = System.Windows.MessageBox;
+using WpfMedia = System.Windows.Media;
 
 namespace ScreenMonitor.UI.Views;
 
 public partial class SettingsView : Page
 {
+    private WpfMedia.SolidColorBrush? _accentGreen;
+    private WpfMedia.SolidColorBrush? _textMuted;
+
     public SettingsView()
     {
         InitializeComponent();
         Loaded += OnLoaded;
     }
 
+    private void CacheBrushes()
+    {
+        _accentGreen = (WpfMedia.SolidColorBrush)FindResource("AccentGreen");
+        _textMuted   = (WpfMedia.SolidColorBrush)FindResource("TextMuted");
+    }
+
     private void OnLoaded(object sender, RoutedEventArgs e)
     {
+        CacheBrushes();
         var app = (App)WpfApp.Current;
-
-        DataPathText.Text = System.IO.Path.GetFullPath(
-            System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data.json"));
 
         if (app.Monitor.IsRunning)
         {
             StatusText.Text = "运行中 - 正在采集数据";
-            StatusDot.Fill = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x22, 0xC5, 0x5E));
-            StatusText.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x22, 0xC5, 0x5E));
+            StatusDot.Fill = _accentGreen;
+            StatusText.Foreground = _accentGreen;
         }
         else
         {
             StatusText.Text = "已暂停";
-            StatusDot.Fill = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x70, 0x70, 0x90));
-            StatusText.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x70, 0x70, 0x90));
+            StatusDot.Fill = _textMuted;
+            StatusText.Foreground = _textMuted;
         }
 
         IgnoreList.ItemsSource = app.Monitor.IgnoredProcesses;

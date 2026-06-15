@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using WpfApp = System.Windows.Application;
+using WpfMedia = System.Windows.Media;
 
 namespace ScreenMonitor.UI.Views;
 
@@ -8,11 +9,26 @@ public partial class AppDetailView : Page
 {
     private readonly string _processName;
 
+    private WpfMedia.SolidColorBrush? _accentPrimary;
+    private WpfMedia.SolidColorBrush? _bgInput;
+    private WpfMedia.SolidColorBrush? _textMuted;
+    private WpfMedia.SolidColorBrush? _borderSoft;
+    private WpfMedia.SolidColorBrush? _borderSubtle;
+
     public AppDetailView(string processName)
     {
         InitializeComponent();
         _processName = processName;
         Loaded += OnLoaded;
+    }
+
+    private void CacheBrushes()
+    {
+        _accentPrimary = (WpfMedia.SolidColorBrush)FindResource("AccentPrimary");
+        _bgInput       = (WpfMedia.SolidColorBrush)FindResource("BgInput");
+        _textMuted     = (WpfMedia.SolidColorBrush)FindResource("TextMuted");
+        _borderSoft    = (WpfMedia.SolidColorBrush)FindResource("BorderSoft");
+        _borderSubtle  = (WpfMedia.SolidColorBrush)FindResource("BorderSubtle");
     }
 
     private async void OnLoaded(object sender, RoutedEventArgs e) => await LoadData();
@@ -23,6 +39,7 @@ public partial class AppDetailView : Page
     {
         try
         {
+            CacheBrushes();
             var app = (App)WpfApp.Current;
             var now = DateTime.Now;
             var from = now.AddHours(-24);
@@ -49,7 +66,6 @@ public partial class AppDetailView : Page
             var totalSeconds = appSessions.Sum(s => s.DurationSeconds);
             TotalTimeText.Text = "总使用时间：" + FormatDuration(totalSeconds);
 
-            // 从当前小时往前推 23 小时，确保第 24 个 slot 覆盖当前小时
             var currentHourStart = new DateTime(now.Year, now.Month, now.Day, now.Hour, 0, 0);
             var fromHour = currentHourStart.AddHours(-23);
             var hourlySeconds = new long[24];
@@ -98,7 +114,6 @@ public partial class AppDetailView : Page
         double availWidth = ChartGrid.ActualWidth > 100 ? ChartGrid.ActualWidth : 560;
         double colW = availWidth / totalSlots;
 
-        // 6 条水平参考线（每 10 分钟一条）
         for (int m = 10; m <= 60; m += 10)
         {
             double ratio = m / maxMinutes;
@@ -109,15 +124,11 @@ public partial class AppDetailView : Page
                 VerticalAlignment = VerticalAlignment.Top,
                 HorizontalAlignment = System.Windows.HorizontalAlignment.Stretch,
                 Margin = new Thickness(0, y, 0, 0),
-                Background = new System.Windows.Media.SolidColorBrush(
-                    m % 30 == 0
-                        ? System.Windows.Media.Color.FromRgb(0x3A, 0x3A, 0x5C)
-                        : System.Windows.Media.Color.FromRgb(0x2A, 0x2A, 0x48))
+                Background = m % 30 == 0 ? _borderSoft : _borderSubtle
             };
             ChartGrid.Children.Add(line);
         }
 
-        // Y 轴刻度
         var yLabels = new[] {
             new { Text = "60", Top = 0.0 },
             new { Text = "45", Top = chartHeight * 0.25 },
@@ -131,16 +142,13 @@ public partial class AppDetailView : Page
             {
                 Text = yl.Text + "分",
                 FontSize = 9,
-                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x70, 0x70, 0x90)),
+                Foreground = _textMuted,
                 Margin = new Thickness(-48, yl.Top, 0, 0),
                 HorizontalAlignment = System.Windows.HorizontalAlignment.Left,
                 VerticalAlignment = VerticalAlignment.Top
             };
             ChartGrid.Children.Add(lbl);
         }
-
-        var clrNormal = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x3B, 0x82, 0xF6));
-        var clrEmpty = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x1A, 0x1A, 0x30));
 
         for (int i = 0; i < totalSlots; i++)
         {
@@ -149,9 +157,8 @@ public partial class AppDetailView : Page
             if (barH < 0) barH = 0;
             if (barH < 1.5 && hourlySeconds[i] > 0) barH = 2;
 
-            var brush = hourlySeconds[i] == 0 ? clrEmpty : clrNormal;
+            var brush = hourlySeconds[i] == 0 ? _bgInput : _accentPrimary;
 
-            // 柱子居中在其 slot 内
             var bar = new Border
             {
                 Width = Math.Max(colW - 4, 2),
@@ -168,7 +175,6 @@ public partial class AppDetailView : Page
             ChartGrid.Children.Add(bar);
         }
 
-        // X 轴标签：每整点一个，居中在每个 slot 下方
         XAxisPanel.Children.Clear();
         XAxisPanel.Width = availWidth;
         for (int i = 0; i < totalSlots; i++)
@@ -180,7 +186,7 @@ public partial class AppDetailView : Page
                 FontSize = 8,
                 Width = colW,
                 TextAlignment = TextAlignment.Center,
-                Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(0x70, 0x70, 0x90))
+                Foreground = _textMuted
             };
             XAxisPanel.Children.Add(lbl);
         }
